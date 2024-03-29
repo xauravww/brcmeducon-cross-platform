@@ -16,19 +16,19 @@ import {appcolor} from '../constants';
 import {ScrollView} from 'react-native';
 import {TouchableOpacity} from 'react-native';
 import {Alert} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
-const Row = ({children}: {children: React.ReactNode}) => (
-  <View style={styles.row}>{children}</View>
-);
-
-export default function StudentDash({navigation}: any) {
+const Row = ({children}) => <View style={styles.row}>{children}</View>;
+export default function AdminDash({route}) {
+  const navigation = useNavigation();
+ 
   return (
     <View style={styles.container}>
       <View style={styles.nameCard}>
         <View>
           <Text style={styles.name}>Hello,</Text>
-          <Text style={styles.name}>SAURAV</Text>
-          <Text style={styles.text}>ID:20-CSE-4375 | STUDENT</Text>
+          <Text style={styles.name}>Admin Ji</Text>
+          <Text style={styles.text}>ID:12345 | ADMIN</Text>
         </View>
         <Image source={manAvatar} style={styles.imgAvatar} />
       </View>
@@ -42,15 +42,17 @@ export default function StudentDash({navigation}: any) {
         /> */}
           <View style={styles.row}>
             <TouchableOpacity
-              onPress={() => navigation.navigate('ShowEvents', {userid: '1'})}>
+              onPress={() => navigation.navigate('Events',{
+                role:"ADMIN"
+              })}>
               <View style={styles.itemWrapper}>
                 <Image source={eventsIcon} style={styles.endItems} />
-                <Text style={styles.text}>Events</Text>
+                <Text style={styles.text}>Manage Events</Text>
               </View>
             </TouchableOpacity>
             <View style={styles.itemWrapper}>
               <Image source={galleryIcon} style={styles.middleItem} />
-              <Text style={styles.text}>Gallery</Text>
+              <Text style={styles.text}>Manage Gallery</Text>
             </View>
             <View style={styles.itemWrapper}>
               <Image source={resultsIcon} style={styles.endItems} />
@@ -122,7 +124,6 @@ const styles = StyleSheet.create({
   name: {
     color: 'black',
     fontFamily: 'Montserrat-Bold',
-    
 
     fontSize: 30,
   },

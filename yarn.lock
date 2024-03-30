@@ -6440,6 +6440,11 @@ react-native-gesture-handler@*, react-native-gesture-handler@^2.15.0, "react-nat
     lodash "^4.17.21"
     prop-types "^15.7.2"
 
+react-native-loader-kit@^2.0.8:
+  version "2.0.8"
+  resolved "https://registry.npmjs.org/react-native-loader-kit/-/react-native-loader-kit-2.0.8.tgz"
+  integrity sha512-mteFh4HF5uMjazLPxEE4lWw3aCWLH5jiUbqVZU4TtOWC+WV/Kck+ipDwsGzEqVxaIXh6bNoti1fkziNGLiuDJg==
+
 react-native-paper@^5.12.3:
   version "5.12.3"
   resolved "https://registry.npmjs.org/react-native-paper/-/react-native-paper-5.12.3.tgz"

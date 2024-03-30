@@ -7,33 +7,38 @@ import { appcolor } from '../constants';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import axios from 'axios';
 import { compareAsc, format } from "date-fns";
-
-export default function ManageEvents({route,navigation}) {
+import LoaderKit from 'react-native-loader-kit'
+export default function ManageEvents({ route, navigation }) {
+  const [loading, setloading] = useState(false)
   const item = route.params
   const roleData = ['Student', 'Teacher', 'Admin', 'All'];
-  const holidayData = ['Holiday','Event','Both']
+  const holidayData = ['Holiday', 'Event', 'Both']
   const [selectedLanguage, setSelectedLanguage] = useState();
-  const [manageEventsInputs, setmanageEventsInputs] = useState({ name: "", description: "", date: "", time: "", assignTo: "" ,eventType:"" ,monthCode:1})
+  const [manageEventsInputs, setmanageEventsInputs] = useState({ name: "", description: "", date: "", time: "", assignTo: "", eventType: "", monthCode: 1, id: "" })
 
   const [date, setDate] = useState(new Date())
   const [open, setOpen] = useState(false)
-  const [openTimeModal ,setopenTimeModal ]= useState(false)
-
+  const [openTimeModal, setopenTimeModal] = useState(false)
+  const [actionType, setactionType] = useState("VIEW")
   const dateStr = new Date();
   const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
 
-  console.log(formattedDate);
 
-  useEffect(()=>{
-    if(item){
-      const {name,description,date,assignTo,eventType,time} = item
-      setmanageEventsInputs({...manageEventsInputs,name:name,description:description,date:date,time:time,assignTo:assignTo,eventType:eventType})
-      console.log("Current state values after editing btn pressed")
-    console.log(name,description,date,assignTo,eventType,time)
-     
+
+  useEffect(() => {
+    if (item) {
+      const { name, description, date, assignTo, eventType, time, id, actionType } = item
+      setmanageEventsInputs({ ...manageEventsInputs, name: name, description: description, date: date, time: time, assignTo: assignTo, eventType: eventType, id: id })
+
+      if (actionType) {
+        setactionType("EDIT")
+      }
+
+
+
     }
-    
-  },[])
+
+  }, [])
 
   const handleInputChange = (inputId, value) => {
     setmanageEventsInputs(prevState => ({
@@ -43,23 +48,65 @@ export default function ManageEvents({route,navigation}) {
   };
 
   useEffect(() => {
-    manageEventsInputs.monthCode = date.getMonth()+1
+    console.log("stored: ", manageEventsInputs.date)
+    manageEventsInputs.monthCode = date.getMonth() + 1
   }, [manageEventsInputs.date])
 
   const handleSubmitEvents = () => {
-    console.log(manageEventsInputs)
-axios.post('http://sources-pee.gl.at.ply.gg:63207/api/v1/events1',{name:manageEventsInputs.name,description:manageEventsInputs.description,date:date,time:manageEventsInputs.time,assignTo:manageEventsInputs.assignTo,eventType:manageEventsInputs.eventType,monthCode:manageEventsInputs.monthCode}).then((res)=>{
-  console.log(res.data)
-}).catch((err)=>{
-  console.log(err)
-})
-    
+    setloading(true)
+    axios.post('http://sources-pee.gl.at.ply.gg:63207/api/v1/events1', { name: manageEventsInputs.name, description: manageEventsInputs.description, date: manageEventsInputs.date, time: manageEventsInputs.time, assignTo: manageEventsInputs.assignTo, eventType: manageEventsInputs.eventType, monthCode: manageEventsInputs.monthCode }).then((res) => {
+      if (res.data.success) {
+        navigation.pop(1)
+      }
+    }).catch((err) => {
+
+    })
+
   }
-  
+
+  const handleDeleteEvents = ( )=>{
+    setloading(true)
+    axios.post(`http://sources-pee.gl.at.ply.gg:63207/api/v1/events1/delete/${manageEventsInputs.id}`).then((res) => {
+      if (res.data.success) {
+        navigation.pop(1)
+      }
+    }).catch((err) => {
+
+    })
+  }
+  const handleEditEvents = ( )=>{
+    setloading(true)
+    axios.post(`http://sources-pee.gl.at.ply.gg:63207/api/v1/events1/update/${manageEventsInputs.id}`, { name: manageEventsInputs.name, description: manageEventsInputs.description, date: manageEventsInputs.date, time: manageEventsInputs.time, assignTo: manageEventsInputs.assignTo, eventType: manageEventsInputs.eventType, monthCode: manageEventsInputs.monthCode }).then((res) => {
+      if (res.data.success) {
+        navigation.pop(1)
+      }
+    }).catch((err) => {
+
+    })
+  }
+  //   return(
+  //    <View style={{backgroundColor:"transparent" ,flex:1, alignItems:"center",justifyContent:"center"}}>
+  //      <LoaderKit
+  //   style={{ width: 100, height: 100 }}
+  //   name={'BallScaleMultiple'}
+  //   color={appcolor}
+  // />
+  //    </View>
+  //   )
 
   return (
     <ScrollView style={{ flex: 1, height: '100%', backgroundColor: 'white' }}>
-      <View style={styles.container}>
+
+      <View style={[styles.container, { position: "relative" }]}>
+        {loading && (
+          <View style={{ backgroundColor: "transparent", flex: 1, alignItems: "center", justifyContent: "center", position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 3 }}>
+            <LoaderKit
+              style={{ width: 200, height: 200 }}
+              name={'BallScaleMultiple'}
+              color={appcolor}
+            />
+          </View>
+        )}
         <View>
           <Text style={styles.text}>Event Name</Text>
           <TextInput
@@ -88,7 +135,7 @@ axios.post('http://sources-pee.gl.at.ply.gg:63207/api/v1/events1',{name:manageEv
               placeholderTextColor={'#a3a3a3'}
               style={{ color: "black" }}
               value={manageEventsInputs.date}
-              onChangeText={(text) => handleInputChange("date", Date.parse(text))}
+              onChangeText={(text) => handleInputChange("date", text)}
             />
             <TouchableOpacity onPress={() => setOpen(true)}>
               <Fontisto name="date" color={'black'} size={25} />
@@ -110,6 +157,7 @@ axios.post('http://sources-pee.gl.at.ply.gg:63207/api/v1/events1',{name:manageEv
               />
             </TouchableOpacity>
           </View>
+
         </View>
         <View style={{ marginTop: 10 }}>
           <Text style={styles.text}>Time (optional)</Text>
@@ -117,13 +165,13 @@ axios.post('http://sources-pee.gl.at.ply.gg:63207/api/v1/events1',{name:manageEv
             <TextInput
               placeholder="09:00 AM"
               placeholderTextColor={'#a3a3a3'}
-              style={{color:"black"}}
+              style={{ color: "black" }}
               value={manageEventsInputs.time}
               onChangeText={(text) => handleInputChange("time", text)}
             />
-            <TouchableOpacity onPress={()=> setopenTimeModal(true)}>
-            <Fontisto name="clock" color={'black'} size={25} />
-            <DatePicker
+            <TouchableOpacity onPress={() => setopenTimeModal(true)}>
+              <Fontisto name="clock" color={'black'} size={25} />
+              <DatePicker
                 modal
                 open={openTimeModal}
                 date={date}
@@ -133,15 +181,16 @@ axios.post('http://sources-pee.gl.at.ply.gg:63207/api/v1/events1',{name:manageEv
                 onConfirm={(date) => {
                   setopenTimeModal(false)
                   // setDate(date)
-                  setmanageEventsInputs({ ...manageEventsInputs, time:date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) })
+                  setmanageEventsInputs({ ...manageEventsInputs, time: date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) })
                 }}
                 onCancel={() => {
                   setopenTimeModal(false)
                 }}
-                />
+              />
             </TouchableOpacity>
           </View>
         </View>
+        <Text style={{ color: "black" }}>id is{manageEventsInputs.id}</Text>
         <View
           style={{
             marginTop: 20,
@@ -154,20 +203,20 @@ axios.post('http://sources-pee.gl.at.ply.gg:63207/api/v1/events1',{name:manageEv
           }}>
           <Text style={styles.text}>Assign To</Text>
           <SelectDropdown
-          defaultButtonText='Select'
+            defaultButtonText='Select'
             data={roleData}
             buttonTextStyle={styles.picker}
             buttonStyle={styles.buttonStyle}
             rowTextStyle={{ textAlign: 'right', color: 'black' }}
             rowStyle={{ backgroundColor: '#dbdbdb' }}
             onSelect={(selectedItem, index) => {
-              console.log(selectedItem, index);
+
               setmanageEventsInputs(prevState => ({
                 ...prevState,
                 assignTo: selectedItem
               }));
             }}
-            
+
             defaultValue={manageEventsInputs.assignTo}
             buttonTextAfterSelection={(selectedItem, index) => {
               // text represented after item is selected
@@ -193,14 +242,14 @@ axios.post('http://sources-pee.gl.at.ply.gg:63207/api/v1/events1',{name:manageEv
           }}>
           <Text style={styles.text}>Event Type</Text>
           <SelectDropdown
-          defaultButtonText='Select'
+            defaultButtonText='Select'
             data={holidayData}
             buttonTextStyle={styles.picker}
             buttonStyle={styles.buttonStyle}
             rowTextStyle={{ textAlign: 'right', color: 'black' }}
             rowStyle={{ backgroundColor: '#dbdbdb' }}
             onSelect={(selectedItem, index) => {
-              console.log(selectedItem, index);
+
               setmanageEventsInputs(prevState => ({
                 ...prevState,
                 eventType: selectedItem
@@ -219,11 +268,32 @@ axios.post('http://sources-pee.gl.at.ply.gg:63207/api/v1/events1',{name:manageEv
             }}
           />
         </View>
-        <Pressable onPress={handleSubmitEvents} style={{ backgroundColor: appcolor, alignSelf: "center", marginTop: 40, padding: 5, borderRadius: 10 }}>
+       {
+        actionType=="VIEW" && (
+          <Pressable onPress={handleSubmitEvents} style={{ backgroundColor: !loading ? appcolor : "gray", alignSelf: "center", marginTop: 40, padding: 5, borderRadius: 10 }} disabled={loading ? true : false}>
           <View>
-            <Text style={{ color: "white", textAlign: "center", fontSize: 22,paddingHorizontal:5 ,paddingVertical:5 }}>Submit</Text>
+            <Text style={{ color: "white", textAlign: "center", fontSize: 18, paddingHorizontal: 15, paddingVertical: 5 }}>{!loading ? "Submit" : "Please Wait..."}</Text>
           </View>
         </Pressable>
+        )
+       }
+       {
+        actionType=="EDIT" && (
+         <View style={{alignItems:"center", justifyContent:"space-around",flexDirection:"row"}}>
+           <Pressable onPress={handleEditEvents} style={{ backgroundColor: !loading ? appcolor : "gray", alignSelf: "center", marginTop: 40, padding: 5, borderRadius: 10 }} disabled={loading ? true : false}>
+          <View>
+            <Text style={{ color: "white", textAlign: "center", fontSize: 18, paddingHorizontal: 15, paddingVertical: 5 }}>{!loading ? "Edit" : "Please Wait..."}</Text>
+          </View>
+        </Pressable>
+           <Pressable onPress={handleDeleteEvents} style={{ backgroundColor: !loading ? "red" : "gray", alignSelf: "center", marginTop: 40, padding: 5, borderRadius: 10 }} disabled={loading ? true : false}>
+          <View>
+            <Text style={{ color: "white", textAlign: "center", fontSize: 18, paddingHorizontal: 15, paddingVertical: 5 }}>{!loading ? "Delete" : "Please Wait..."}</Text>
+          </View>
+        </Pressable>
+         </View>
+        )
+       }
+        
       </View>
     </ScrollView>
   );

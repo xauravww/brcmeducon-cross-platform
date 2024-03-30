@@ -36,5 +36,14 @@ function getAllDatesOfYear(year) {
   return allDates;
 }
 
+function getIndianDate() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1)?.padStart(2, '0');
+  const day = String(today.getDate())?.padStart(2, '0');
 
-module.exports = {getAllDatesOfMonth,getAllDatesOfYear}
+  const indianDate = `${year}-${month}-${day}`;
+  return indianDate;
+}
+
+module.exports = {getAllDatesOfMonth,getAllDatesOfYear,getIndianDate}

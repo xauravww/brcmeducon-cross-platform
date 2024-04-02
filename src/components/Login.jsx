@@ -97,8 +97,8 @@ export default function Login({navigation}) {
       <View style={styles.loginPartWrapper}>
         <Text style={styles.roleTitle}>{selectedBtn} Login</Text>
         <Text style={styles.registerInfo}>Not a member yet ? Register</Text>
-        <View style={[styles.inputWrapper, {marginTop: 10}]}>
-          <MaterialIcons name="email" color={appcolor} size={38} />
+        <View style={[styles.inputWrapper, {marginTop: 30}]}>
+          <MaterialIcons name="email" color={appcolor} size={30} />
           <TextInput
             placeholder="Enter Your Email"
             placeholderTextColor={'black'}
@@ -106,7 +106,7 @@ export default function Login({navigation}) {
           />
         </View>
         <View style={[styles.inputWrapper, {marginTop: 3}]}>
-          <Ionicons name="lock-closed" color={appcolor} size={38} />
+          <Ionicons name="lock-closed" color={appcolor} size={30} />
           <TextInput
             placeholder="Enter Your Password"
             placeholderTextColor={'black'}
@@ -114,13 +114,6 @@ export default function Login({navigation}) {
           />
         </View>
       </View>
-
-      {/* <Button
-        title="Login"
-        color={appcolor}
-        onPress={() => console.log('Button pressed!')}
-      /> */}
-
       <Pressable style={styles.button} onPress={onPress}>
         <Text style={styles.text}>Login</Text>
       </Pressable>
@@ -134,10 +127,12 @@ const styles = StyleSheet.create({
     flex: 1,
     // backgroundColor: 'red',
     alignItems: 'center',
+    padding:10
   },
   logo: {
-    height: 250,
-    width: 250,
+    marginTop:40,
+    height: 200,
+    width: 200,
   },
   btnWrapper: {
     flexDirection: 'row',
@@ -149,7 +144,7 @@ const styles = StyleSheet.create({
     // flexWrap: 'wrap-reverse',
   },
   btnWrapperItem: {
-    backgroundColor: 'blue',
+    backgroundColor: appcolor,
     padding: 5,
     // color: '#000',
     // alignContent: 'center',
@@ -161,6 +156,7 @@ const styles = StyleSheet.create({
 
   loginPartWrapper: {
     // backgroundColor: 'green',
+    marginTop:10,
     textAlign: 'center',
   },
   btnText: {
@@ -195,12 +191,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     padding: 8,
     borderColor: 'black',
-    borderBottomWidth: 4,
-    borderRadius: 5,
     width: '85%',
     backgroundColor: '#ccc',
     marginLeft: 10,
     alignItems: 'center',
+    borderRadius:5,
   },
 
   button: {
@@ -208,7 +203,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: appcolor,
     padding: 10,
-    marginTop: 20,
+    marginTop: 50,
     width: '95%',
     borderRadius: 10,
   },

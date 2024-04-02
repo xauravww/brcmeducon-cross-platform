@@ -7,7 +7,7 @@ const stack = createNativeStackNavigator()
 export default function StudentStack() {
   return (
    <stack.Navigator>
-    <stack.Screen name='StudentDash' component={StudentDash}></stack.Screen>
+    <stack.Screen name='StudentDash' component={StudentDash} ></stack.Screen>
     <stack.Group>
       <stack.Screen name="ShowEvents" component={Event}/>
     </stack.Group>

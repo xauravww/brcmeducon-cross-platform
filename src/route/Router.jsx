@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native'
 import AdminStack from './AdminStack'
 import { authContext } from '../context/AuthContextFunction'
 import AuthStack from './AuthStack'
+import FacultyStack from './FacultyStack'
 
 export default function Router() {
   const {role,setRole} = useContext(selectRoleContext)
@@ -28,6 +29,13 @@ export default function Router() {
   return(
     <NavigationContainer>
       <AdminStack/>
+    </NavigationContainer>
+  )
+ }
+ if(role.Faculty){
+  return(
+    <NavigationContainer>
+      <FacultyStack/>
     </NavigationContainer>
   )
  }

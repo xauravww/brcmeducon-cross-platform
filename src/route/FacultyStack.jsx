@@ -8,6 +8,8 @@ import { appcolor } from '../constants'
 import { useNavigation } from '@react-navigation/native'
 import FacultyDash from '../components/FacultyDash'
 import SendAssignments from '../components/SendAssignments'
+import ManageAttendance from '../components/ManageAttendance'
+import CreateAttendanceScreen from '../components/CreateAttendanceScreen'
 export default function FacultyStack() {
   const stack = createNativeStackNavigator()
   const navigation = useNavigation()
@@ -25,8 +27,19 @@ export default function FacultyStack() {
               />
             ),
           }}/> 
+    <stack.Screen name='ManageAttendance'  component={ManageAttendance}  options={{
+            title: 'Manage Attendance',
+            headerRight: () => (
+              <Button
+                onPress={() => navigation.navigate("CreateAttendanceScreen")}
+                title="Add New"
+                color={appcolor}
+              />
+            ),
+          }}/>
+        
     </stack.Group>
-    
+    <stack.Screen name='CreateAttendanceScreen'  component={CreateAttendanceScreen}/>  
    </stack.Navigator>
   )
 }

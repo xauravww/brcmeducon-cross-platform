@@ -44,10 +44,16 @@ export default function FacultyDash({route}) {
                 <Text style={styles.text}>Send Assignments</Text>
               </View>
             </TouchableOpacity>
-            <View style={styles.itemWrapper}>
-              <Image source={galleryIcon} style={styles.middleItem} />
-              <Text style={styles.text}>Manage Gallery</Text>
-            </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('ManageAttendance',{
+                role:"FACULTY"
+              })}>
+              <View style={styles.itemWrapper}>
+                <Image source={eventsIcon} style={styles.endItems} />
+                <Text style={styles.text}>Manage Attendance</Text>
+              </View>
+            </TouchableOpacity>
+           
             <View style={styles.itemWrapper}>
               <Image source={resultsIcon} style={styles.endItems} />
               <Text style={styles.text}>Results</Text>

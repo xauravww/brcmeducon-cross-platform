@@ -7,7 +7,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import DatePicker from 'react-native-date-picker';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import moment from 'moment';
-
+import { fetchSubjectArr } from './subject-utils/subject';
+import {API_URL} from "@env"
 // styles
 const styles = {
     pickerContainer: {
@@ -34,6 +35,7 @@ const AttendanceScreen = ({ navigation }) => {
     const [semesterFilter, setSemesterFilter] = useState(null);
     const [dateFilter, setDateFilter] = useState(null);
     const [subjectFilter, setSubjectFilter] = useState(null);
+    const [subjectArr, setsubjectArr] = useState([])
     const [members, setMembers] = useState([]);
     const [membersAttendanceStatus, setmembersAttendanceStatus] = useState({});
     const [selectedMembers, setSelectedMembers] = useState([]);
@@ -50,8 +52,16 @@ const AttendanceScreen = ({ navigation }) => {
         setRefreshing(false);
     }, []);
 
+    useEffect(() => {
+      
+        const arrData = fetchSubjectArr(branchFilter,semesterFilter)
+        setsubjectArr(arrData)
+     
+    }, [branchFilter,semesterFilter])
+    
+
     const fetchMembersData = () => {
-        axios.get('http://sources-pee.gl.at.ply.gg:63207/api/v1/admin/members')
+        axios.get(`${API_URL}/api/v1/admin/members`)
             .then(response => {
                 setMembers(response.data.users);
             })
@@ -68,7 +78,7 @@ const AttendanceScreen = ({ navigation }) => {
             "branch": branchFilter
         };
 
-        axios.post('http://sources-pee.gl.at.ply.gg:63207/api/v1/faculty/attendance/unique', bodyData)
+        axios.post(`${API_URL}/api/v1/faculty/attendance/unique`, bodyData)
             .then(response => {
                 setAttendanceData(response.data.data);
                 setLoading(false);
@@ -82,7 +92,7 @@ const AttendanceScreen = ({ navigation }) => {
                 });
 
                 setmembersAttendanceStatus(existingAttendanceStatus);
-                // console.log(existingAttendanceStatus)
+ 
 
             })
             .catch(error => {
@@ -168,7 +178,7 @@ const AttendanceScreen = ({ navigation }) => {
             <View style={styles.pickerContainer}>
                 <Icon name="calendar-outline" color={'black'} size={25} />
                 <SelectDropdown
-                    data={['Maths', 'Physics', 'Chemistry', 'Biology']}
+                    data={subjectArr._j}
                     onSelect={(selectedItem, index) => {
                         setSubjectFilter(selectedItem);
                     }}

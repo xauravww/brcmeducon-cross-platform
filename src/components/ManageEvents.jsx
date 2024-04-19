@@ -8,6 +8,7 @@ import Fontisto from 'react-native-vector-icons/Fontisto';
 import axios from 'axios';
 import { compareAsc, format } from "date-fns";
 import LoaderKit from 'react-native-loader-kit'
+import {API_URL} from "@env"
 export default function ManageEvents({ route, navigation }) {
   const [loading, setloading] = useState(false)
   const item = route.params
@@ -54,7 +55,7 @@ export default function ManageEvents({ route, navigation }) {
 
   const handleSubmitEvents = () => {
     setloading(true)
-    axios.post('http://sources-pee.gl.at.ply.gg:63207/api/v1/events1', { name: manageEventsInputs.name, description: manageEventsInputs.description, date: manageEventsInputs.date, time: manageEventsInputs.time, assignTo: manageEventsInputs.assignTo, eventType: manageEventsInputs.eventType, monthCode: manageEventsInputs.monthCode }).then((res) => {
+    axios.post(`${API_URL}/api/v1/events1`, { name: manageEventsInputs.name, description: manageEventsInputs.description, date: manageEventsInputs.date, time: manageEventsInputs.time, assignTo: manageEventsInputs.assignTo, eventType: manageEventsInputs.eventType, monthCode: manageEventsInputs.monthCode }).then((res) => {
       if (res.data.success) {
         navigation.pop(1)
       }
@@ -66,7 +67,7 @@ export default function ManageEvents({ route, navigation }) {
 
   const handleDeleteEvents = ( )=>{
     setloading(true)
-    axios.post(`http://sources-pee.gl.at.ply.gg:63207/api/v1/events1/delete/${manageEventsInputs.id}`).then((res) => {
+    axios.post(`${API_URL}/api/v1/events1/delete/${manageEventsInputs.id}`).then((res) => {
       if (res.data.success) {
         navigation.pop(1)
       }
@@ -76,7 +77,7 @@ export default function ManageEvents({ route, navigation }) {
   }
   const handleEditEvents = ( )=>{
     setloading(true)
-    axios.post(`http://sources-pee.gl.at.ply.gg:63207/api/v1/events1/update/${manageEventsInputs.id}`, { name: manageEventsInputs.name, description: manageEventsInputs.description, date: manageEventsInputs.date, time: manageEventsInputs.time, assignTo: manageEventsInputs.assignTo, eventType: manageEventsInputs.eventType, monthCode: manageEventsInputs.monthCode }).then((res) => {
+    axios.post(`${API_URL}/api/v1/events1/update/${manageEventsInputs.id}`, { name: manageEventsInputs.name, description: manageEventsInputs.description, date: manageEventsInputs.date, time: manageEventsInputs.time, assignTo: manageEventsInputs.assignTo, eventType: manageEventsInputs.eventType, monthCode: manageEventsInputs.monthCode }).then((res) => {
       if (res.data.success) {
         navigation.pop(1)
       }

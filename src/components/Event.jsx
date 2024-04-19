@@ -15,7 +15,7 @@ import { appcolor } from '../constants';
 import { getAllDatesOfMonth, getAllDatesOfYear ,getIndianDate} from './calendar-utils/date'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
-
+import {API_URL} from "@env"
 export default function Event({ route, navigation }) {
   const [eventData, seteventData] = useState({})
   const [items, setitems] = useState({})
@@ -100,7 +100,7 @@ export default function Event({ route, navigation }) {
     if (role) {
       setroleType(role)
     }
-    axios.get(`http://sources-pee.gl.at.ply.gg:63207/api/v1/events1/`)
+    axios.get(`${API_URL}/api/v1/events1/`)
       .then((data) => {
         const dataArr = data.data.data;
         const updatedItemsList = { ...itemsList };

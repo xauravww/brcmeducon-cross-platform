@@ -8,7 +8,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import DatePicker from 'react-native-date-picker';
 import { appcolor } from '../constants';
 import moment from 'moment';
-
+import { fetchSubjectArr } from './subject-utils/subject';
+import {API_URL} from "@env"
 const CreateAttendanceScreen = ({ route, navigation }) => {
   const {
     branchFilter,
@@ -28,6 +29,7 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
   const [semester, setSemester] = useState('');
   const [branch, setBranch] = useState('');
   const [subject, setSubject] = useState('');
+  const [subjectArr, setsubjectArr] = useState([])
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +48,7 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
     const fetchMembers = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get('http://sources-pee.gl.at.ply.gg:63207/api/v1/admin/members');
+        const response = await axios.get(`${API_URL}/api/v1/admin/members`);
         if (response.data.success) {
           const filteredMembers = response.data.users.filter((user) => user.branch === branch && user.semester === semester);
           const sortedMembers = filteredMembers.sort((a, b) => a.rollno.localeCompare(b.rollno));
@@ -62,6 +64,11 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
     if (branch && semester) {
       fetchMembers();
     }
+   const arrdata = fetchSubjectArr(branch,semester)
+   console.log(branch)
+   console.log(semester)
+   console.log(arrdata)
+   setsubjectArr(arrdata)
   }, [branch, semester]);
 
   useEffect(() => {
@@ -117,7 +124,7 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
         id: attendanceDataId,
       };
 
-      let endpoint = 'http://sources-pee.gl.at.ply.gg:63207/api/v1/faculty/attendance';
+      let endpoint = `${API_URL}/api/v1/faculty/attendance`;
 
       if (editAttendance) {
         endpoint += '/update';
@@ -154,7 +161,7 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
 
   const handleDelete = async () => {
     try {
-      const response = await axios.delete(`http://sources-pee.gl.at.ply.gg:63207/api/v1/faculty/attendance/${attendanceDataId}`);
+      const response = await axios.delete(`${API_URL}/api/v1/faculty/attendance/${attendanceDataId}`);
 
       if (response.data.success) {
         setSnackbarMessage('Attendance deleted successfully');
@@ -212,7 +219,7 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
       <View style={styles.pickerContainer}>
         <MaterialCommunityIcons name="book" color={'black'} size={25} />
         <SelectDropdown
-          data={['Maths', 'Physics', 'Chemistry', 'Biology']}
+          data={subjectArr._j}
           onSelect={(selectedItem, index) => setSubject(selectedItem)}
           defaultButtonText={subject || 'Select Subject'}
           buttonTextAfterSelection={(selectedItem) => selectedItem}

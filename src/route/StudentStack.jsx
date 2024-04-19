@@ -3,6 +3,7 @@ import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import StudentDash from '../components/StudentDash'
 import Event from '../components/Event'
+import StudentAttendance from '../components/StudentAttendance'
 const stack = createNativeStackNavigator()
 export default function StudentStack() {
   return (
@@ -10,6 +11,8 @@ export default function StudentStack() {
     <stack.Screen name='StudentDash' component={StudentDash} ></stack.Screen>
     <stack.Group>
       <stack.Screen name="ShowEvents" component={Event}/>
+      <stack.Screen name="StudentAttendance" component={StudentAttendance}/>
+
     </stack.Group>
    </stack.Navigator>
   )

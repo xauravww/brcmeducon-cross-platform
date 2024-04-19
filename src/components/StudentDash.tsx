@@ -44,14 +44,18 @@ export default function StudentDash({navigation}: any) {
             <TouchableOpacity
               onPress={() => navigation.navigate('ShowEvents', {userid: '1'})}>
               <View style={styles.itemWrapper}>
-                <Image source={eventsIcon} style={styles.endItems} />
+                <Image source={eventsIcon} style={styles.endItemsActive} />
                 <Text style={styles.text}>Events</Text>
               </View>
             </TouchableOpacity>
-            <View style={styles.itemWrapper}>
+           <TouchableOpacity
+           onPress={() => navigation.navigate('StudentAttendance')}
+           >
+           <View style={styles.itemWrapper}>
               <Image source={galleryIcon} style={styles.middleItem} />
-              <Text style={styles.text}>Gallery</Text>
+              <Text style={styles.text}>My Attendances</Text>
             </View>
+           </TouchableOpacity>
             <View style={styles.itemWrapper}>
               <Image source={resultsIcon} style={styles.endItems} />
               <Text style={styles.text}>Results</Text>
@@ -147,9 +151,23 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 10,
+    backgroundColor: "#ccc",
+  },
+  endItemsActive: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
     backgroundColor: appcolor,
   },
   middleItem: {
+    height: 120,
+    borderRadius: 10,
+    width: 120,
+    backgroundColor: "#ccc",
+    // alignItems: 'center',
+    // padding:10
+  },
+  middleItemActive: {
     height: 120,
     borderRadius: 10,
     width: 120,

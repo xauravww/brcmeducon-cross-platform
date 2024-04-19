@@ -49,7 +49,7 @@ export default function FacultyDash({route}) {
                 role:"FACULTY"
               })}>
               <View style={styles.itemWrapper}>
-                <Image source={eventsIcon} style={styles.endItems} />
+                <Image source={eventsIcon} style={styles.middleItemActive} />
                 <Text style={styles.text}>Manage Attendance</Text>
               </View>
             </TouchableOpacity>
@@ -148,9 +148,23 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 10,
+    backgroundColor: "#ccc",
+  },
+  endItemsActive: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
     backgroundColor: appcolor,
   },
   middleItem: {
+    height: 120,
+    borderRadius: 10,
+    width: 120,
+    backgroundColor: "#ccc",
+    // alignItems: 'center',
+    // padding:10
+  },
+  middleItemActive: {
     height: 120,
     borderRadius: 10,
     width: 120,

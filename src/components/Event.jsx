@@ -15,7 +15,7 @@ import { appcolor } from '../constants';
 import { getAllDatesOfMonth, getAllDatesOfYear ,getIndianDate} from './calendar-utils/date'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
-import {API_URL} from "@env"
+import API_URL from '../connection/url';
 export default function Event({ route, navigation }) {
   const [eventData, seteventData] = useState({})
   const [items, setitems] = useState({})

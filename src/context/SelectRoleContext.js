@@ -1,8 +1,12 @@
-import { createContext, useState } from "react"
+import { createContext, useState ,useEffect } from "react"
 
 export const selectRoleContext = createContext()
 
 function SelectRoleContext({children}) {
+  useEffect(() => {
+  console.log("Chnaged role:",role)
+  }, [role])
+  
  const [role,setRole]=useState({
   Student:true,Faculty:false,Admin:false
  })

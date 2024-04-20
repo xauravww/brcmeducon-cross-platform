@@ -6,30 +6,74 @@ import {
   Button,
   TextInput,
   Pressable,
+  ActivityIndicator
 } from 'react-native';
-import React, {useContext, useState} from 'react';
+import React, { useContext, useState ,useEffect} from 'react';
 import Logo from '../assets/images/brcm_logo_big.png';
-import {appcolor} from '../constants';
+import { appcolor } from '../constants';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { authContext } from '../context/AuthContextFunction';
 import { selectRoleContext } from '../context/SelectRoleContext';
-
-
-export default function Login({navigation}) {
+import axios from 'axios';
+import API_URL from '../connection/url';
+import { Snackbar } from 'react-native-paper';
+export default function Login({ navigation }) {
   const [selectedBtn, setselectedBtn] = useState('Student');
-  const {setIsLoggedIn} = useContext(authContext)
-  const {role,setRole} = useContext(selectRoleContext)
+  const { setIsLoggedIn,authData,setAuthData ,logOutMsg,setlogOutMsg } = useContext(authContext);
+  const { role, setRole } = useContext(selectRoleContext);
+  const [inputData, setinputData] = useState({ email: 'student@gmail.com', pass: 'student@123' });
+  const [isLoading, setIsLoading] = useState(false);
+
+
+  //for snackbar
+  const [visible, setVisible] = React.useState(false);
+
+  const onToggleSnackBar = () => setVisible(!visible);
+
+  const onDismissSnackBar = () => setVisible(false);
+ 
+  useEffect(() => {
+    setTimeout(()=>{
+      setVisible('false')
+    },100)
+  }, [logOutMsg])
   
-  const onPress = () => {
-    // alert('It is working');
+
+  
+  const onPress = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/v1/login`, {
+        email: inputData.email,
+        pass: inputData.pass,
+      });
+      setAuthData(response.data)
+      if(response.data.success) {
+        setAuthData(response.data)
+        setIsLoggedIn(true);
+      }
+      const { role: apiRole } = response.data.member;
+      setRole({
+        Admin: apiRole === 'admin',
+        Student: apiRole === 'student',
+        Faculty: apiRole === 'faculty',
+      });
+    } catch (error) {
+      console.error('Login failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
     setIsLoggedIn(true)
     if (selectedBtn == 'Student') {
-      setRole({Admin:false,Student:true,Faculty:false})
+      setinputData({ email: 'student@gmail.com', pass: 'student@123' })
+      setRole({ Admin: false, Student: true, Faculty: false })
     } else if (selectedBtn == 'Admin') {
-      setRole({Admin:true,Student:false,Faculty:false})
-    }else if(selectedBtn == 'Faculty'){
-      setRole({Admin:false,Student:false,Faculty:true})
+      setinputData({ email: 'admin@gmail.com', pass: 'admin@123' })
+      setRole({ Admin: true, Student: false, Faculty: false })
+    } else if (selectedBtn == 'Faculty') {
+      setinputData({ email: 'faculty@gmail.com', pass: 'faculty@123' })
+      setRole({ Admin: false, Student: false, Faculty: true })
     }
   };
   return (
@@ -51,7 +95,9 @@ export default function Login({navigation}) {
                 : styles.btnWrapperItem
             }>
             <Text
-              onPress={() => setselectedBtn('Student')}
+              onPress={() => {setselectedBtn('Student')
+              setinputData({ email: 'student@gmail.com', pass: 'student@123' })
+            }}
               style={
                 selectedBtn == 'Student'
                   ? styles.btnTextSelected
@@ -65,10 +111,12 @@ export default function Login({navigation}) {
               selectedBtn == 'Faculty'
                 ? styles.btnWrapperItemSelected
                 : styles.btnWrapperItem,
-              {marginHorizontal: 2},
+              { marginHorizontal: 2 },
             ]}>
             <Text
-              onPress={() => setselectedBtn('Faculty')}
+              onPress={() => {setselectedBtn('Faculty')
+              setinputData({ email: 'faculty@gmail.com', pass: 'faculty@123' })
+            }}
               style={
                 selectedBtn == 'Faculty'
                   ? styles.btnTextSelected
@@ -84,7 +132,9 @@ export default function Login({navigation}) {
                 : styles.btnWrapperItem
             }>
             <Text
-              onPress={() => setselectedBtn('Admin')}
+              onPress={() =>{ setselectedBtn('Admin')
+              setinputData({ email: 'admin@gmail.com', pass: 'admin@123' })
+            } }
               style={
                 selectedBtn == 'Admin' ? styles.btnTextSelected : styles.btnText
               }>
@@ -97,26 +147,50 @@ export default function Login({navigation}) {
       <View style={styles.loginPartWrapper}>
         <Text style={styles.roleTitle}>{selectedBtn} Login</Text>
         <Text style={styles.registerInfo}>Not a member yet ? Register</Text>
-        <View style={[styles.inputWrapper, {marginTop: 30}]}>
+        <View style={[styles.inputWrapper, { marginTop: 30 }]}>
           <MaterialIcons name="email" color={appcolor} size={30} />
           <TextInput
             placeholder="Enter Your Email"
             placeholderTextColor={'black'}
             style={styles.textInput}
+            value={inputData.email}
+            onChangeText={(text) => setinputData({ ...inputData, email: text })}
           />
         </View>
-        <View style={[styles.inputWrapper, {marginTop: 3}]}>
+        <View style={[styles.inputWrapper, { marginTop: 3 }]}>
           <Ionicons name="lock-closed" color={appcolor} size={30} />
           <TextInput
             placeholder="Enter Your Password"
             placeholderTextColor={'black'}
             style={styles.textInput}
+            value={inputData.pass}
+            onChangeText={(text) => setinputData({ ...inputData, pass: text })}
           />
         </View>
       </View>
-      <Pressable style={styles.button} onPress={onPress}>
-        <Text style={styles.text}>Login</Text>
-      </Pressable>
+      {isLoading ? (
+        <ActivityIndicator size="large" color={appcolor} style={styles.loader} />
+      ) : (
+        <Pressable style={styles.button} onPress={onPress}>
+          <Text style={styles.text}>Login</Text>
+        </Pressable>
+      )}
+
+{logOutMsg.length > 0 && (
+      <Snackbar
+        visible={visible}
+        onDismiss={onDismissSnackBar}
+        action={{
+          label: 'Close',
+          onPress: () => {
+            setVisible(false);
+            setlogOutMsg('')
+          },
+        }}
+      >
+        {logOutMsg}
+      </Snackbar>
+    )}
     </View>
   );
 }
@@ -127,12 +201,13 @@ const styles = StyleSheet.create({
     flex: 1,
     // backgroundColor: 'red',
     alignItems: 'center',
-    padding:10
+    padding: 10
   },
   logo: {
-    marginTop:40,
+    marginTop: 40,
     height: 200,
     width: 200,
+    marginLeft:10
   },
   btnWrapper: {
     flexDirection: 'row',
@@ -156,7 +231,7 @@ const styles = StyleSheet.create({
 
   loginPartWrapper: {
     // backgroundColor: 'green',
-    marginTop:10,
+    marginTop: 10,
     textAlign: 'center',
   },
   btnText: {
@@ -195,7 +270,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
     marginLeft: 10,
     alignItems: 'center',
-    borderRadius:5,
+    borderRadius: 5,
   },
 
   button: {

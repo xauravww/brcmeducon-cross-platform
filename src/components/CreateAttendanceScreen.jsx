@@ -9,7 +9,7 @@ import DatePicker from 'react-native-date-picker';
 import { appcolor } from '../constants';
 import moment from 'moment';
 import { fetchSubjectArr } from './subject-utils/subject';
-import {API_URL} from "@env"
+import API_URL from '../connection/url';
 const CreateAttendanceScreen = ({ route, navigation }) => {
   const {
     branchFilter,

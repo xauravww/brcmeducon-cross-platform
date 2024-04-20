@@ -1,0 +1,1 @@
+export default API_URL = 'https://backendbrcmeducon.onrender.com'

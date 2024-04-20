@@ -1,33 +1,108 @@
-import { StyleSheet, Text, View , Button } from 'react-native'
-import React from 'react'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import AdminDash from '../components/AdminDash'
-import ManageEvents from '../components/ManageEvents'
-import Event from '../components/Event'
-import { appcolor } from '../constants'
-import { useNavigation } from '@react-navigation/native'
-export default function AdminStack() {
-  const stack = createNativeStackNavigator()
-  const navigation = useNavigation()
+import React, { useContext } from 'react';
+import { StyleSheet, Text, View, Button, Image } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { DrawerActions, useNavigation } from '@react-navigation/native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { authContext } from '../context/AuthContextFunction';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AdminDash from '../components/AdminDash';
+import ManageEvents from '../components/ManageEvents';
+import Event from '../components/Event';
+
+const Drawer = createDrawerNavigator();
+const Stack = createNativeStackNavigator();
+
+const AdminHomeStack = () => {
   return (
-   <stack.Navigator>
-    <stack.Screen name='AdminDash'  component={AdminDash}/> 
-    <stack.Group>
-    <stack.Screen name='Events'  component={Event}  options={{
-            title: 'Manage Events',
-            headerRight: () => (
-              <Button
-                onPress={() => navigation.navigate("ManageEvents")}
-                title="Add New"
-                color={appcolor}
-              />
-            ),
-          }}/> 
-    <stack.Screen name='ManageEvents'  component={ManageEvents} /> 
-    </stack.Group>
-    
-   </stack.Navigator>
-  )
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='AdminDash' component={AdminDash} />
+      <Stack.Screen name='ManageEvents' component={ManageEvents} />
+      <Stack.Screen name='Events' component={Event} />
+    </Stack.Navigator>
+  );
+};
+
+export default function AdminStack() {
+  const navigation = useNavigation();
+
+  return (
+    <Drawer.Navigator initialRouteName='AdminHome'
+      drawerContent={({ navigation }) => <CustomDrawerContent navigation={navigation} />}
+      screenOptions={{
+        drawerStyle: {
+          backgroundColor: '#dadada',
+          width: 240,
+        },
+        drawerType: 'slide',
+        drawerHideStatusBarOnOpen: true,
+        swipeEnabled: true,
+        swipeEdgeWidth: 100,
+        gestureHandlerProps: {
+          onGestureEvent: ({ nativeEvent }) => {
+            if (nativeEvent.absoluteX > 100 && nativeEvent.velocityX > 0.5) {
+              console.log('Swiped to open drawer');
+              navigation.dispatch(DrawerActions.openDrawer());
+            } else if (nativeEvent.absoluteX < 50 && nativeEvent.velocityX < -0.5) {
+              console.log('Swiped to close drawer');
+              navigation.dispatch(DrawerActions.closeDrawer());
+            }
+          }
+        }
+      }}
+    >
+      <Drawer.Screen name='AdminHome' component={AdminHomeStack} />
+    </Drawer.Navigator>
+  );
 }
 
-const styles = StyleSheet.create({})
+function CustomDrawerContent({ navigation }) {
+  const { setAuthData, setIsLoggedIn, setlogOutMsg } = useContext(authContext);
+
+  const handleLogout = async () => {
+    try {
+      // Remove auth-data from AsyncStorage
+      await AsyncStorage.removeItem('auth-data').then(()=>{
+        setAuthData({}); // Clear authData
+        setIsLoggedIn(false); // Set isLoggedIn to false
+      });
+    } catch (e) {
+      console.error("Error removing value:", e);
+    }
+  };
+
+
+  return (
+    <View>
+      <Button
+        title="Close"
+        onPress={() => {
+          navigation.navigate('AdminHome');
+        }}
+      />
+
+      <View style={{ backgroundColor: "#ccc", height: "45%" }}>
+        <Image
+          source={require('../assets/images/brcm_logo_big.png')}
+          style={{ height: 200, width: 200, marginLeft: 20 }}
+        />
+      </View>
+      <TouchableOpacity
+        onPress={() => {
+          setlogOutMsg('You have been logged out');
+          handleLogout();
+        }}
+      >
+        <View style={{ backgroundColor: "#ccc", marginTop: 10 }}>
+          <Text style={{ color: "black", fontSize: 20, fontFamily: "NotoSans_Condensed-Regular", padding: 10 }}>
+            Log Out
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  // Add your styles here
+});

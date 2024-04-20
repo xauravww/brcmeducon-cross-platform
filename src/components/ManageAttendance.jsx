@@ -8,7 +8,7 @@ import DatePicker from 'react-native-date-picker';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import moment from 'moment';
 import { fetchSubjectArr } from './subject-utils/subject';
-import {API_URL} from "@env"
+import API_URL from '../connection/url';
 // styles
 const styles = {
     pickerContainer: {

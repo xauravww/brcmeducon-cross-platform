@@ -8,7 +8,7 @@ import Fontisto from 'react-native-vector-icons/Fontisto';
 import axios from 'axios';
 import { compareAsc, format } from "date-fns";
 import LoaderKit from 'react-native-loader-kit'
-import {API_URL} from "@env"
+import API_URL from '../connection/url';
 export default function ManageEvents({ route, navigation }) {
   const [loading, setloading] = useState(false)
   const item = route.params

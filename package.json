@@ -13,6 +13,7 @@
     "devtools": "react-devtools"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-picker/picker": "^2.6.1",
     "@react-navigation/drawer": "^6.6.11",
     "@react-navigation/native": "^6.1.14",
@@ -35,7 +36,8 @@
     "react-native-screens": "^3.29.0",
     "react-native-select-dropdown": "^3.4.0",
     "react-native-typography": "^1.4.1",
-    "react-native-vector-icons": "^10.0.3"
+    "react-native-vector-icons": "^10.0.3",
+    "uninstall": "^0.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

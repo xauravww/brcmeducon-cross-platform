@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import axios from 'axios';
 import SelectDropdown from 'react-native-select-dropdown';
-import {API_URL} from "@env"
+import API_URL from '../connection/url';
 const StudentAttendance = () => {
     const [attendanceData, setAttendanceData] = useState({});
     const [markedDates, setMarkedDates] = useState({});

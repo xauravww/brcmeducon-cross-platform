@@ -6,6 +6,7 @@ import { appcolor, conatainerColor } from './constants';
 import Router from './route/Router';
 import AuthContextFunction from './context/AuthContextFunction';
 import SelectRoleContext from './context/SelectRoleContext';
+import SelectorInputsContext from './context/SelectorInputsContext';
 export default function App() {
   return (
     <>
@@ -14,7 +15,9 @@ export default function App() {
         {/* <TopBar /> */}
         <AuthContextFunction>
           <SelectRoleContext>
+            <SelectorInputsContext>
             <Router />
+            </SelectorInputsContext>
           </SelectRoleContext>
         </AuthContextFunction>
       </View>

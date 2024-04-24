@@ -47,10 +47,10 @@ export default function FacultyDash({ navigation }) {
         <View style={styles.dashContent}>
           <View style={styles.row}>
             <TouchableOpacity
-              onPress={() => navigation.navigate('SendAssignments', { role: "FACULTY" })}>
+              onPress={() => navigation.navigate('Events', { role: "FACULTY" })}>
               <View style={styles.itemWrapper}>
-                <Image source={eventsIcon} style={styles.endItems} />
-                <Text style={styles.text}>Send Assignments</Text>
+                <Image source={eventsIcon} style={styles.endItemsActive} />
+                <Text style={styles.text}>Events</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity
@@ -60,53 +60,17 @@ export default function FacultyDash({ navigation }) {
                 <Text style={styles.text}>Manage Attendance</Text>
               </View>
             </TouchableOpacity>
-            <View style={styles.itemWrapper}>
-              <Image source={examsIcon} style={styles.endItems} />
-              <Text style={styles.text}>Results</Text>
-            </View>
-          </View>
-          <View style={styles.row}>
+            <TouchableOpacity
+            onPress={() => navigation.navigate('IDCard', { role: "FACULTY" })}
+            >
             <View>
-              <Image source={alumniIcon} style={styles.endItems} />
-              <Text style={styles.text}>Alumni Meet</Text>
-            </View>
-            <View>
-              <Image source={examsIcon} style={styles.middleItem} />
-              <Text style={styles.text}>Exams</Text>
-            </View>
-            <View>
-              <Image source={idCardIcon} style={styles.endItems} />
+              <Image source={idCardIcon} style={styles.endItemsActive} />
               <Text style={styles.text}>ID Card</Text>
             </View>
+            </TouchableOpacity>
           </View>
-          <View style={styles.row}>
-            <View>
-              <Image source={timeTableIcon} style={styles.endItems} />
-              <Text style={styles.text}>Time Table</Text>
-            </View>
-            <View>
-              <Image source={assignmentIcon} style={styles.middleItem} />
-              <Text style={styles.text}>Assignment</Text>
-            </View>
-            <View>
-              <Image source={pyqsIcon} style={styles.endItems} />
-              <Text style={styles.text}>PYQs</Text>
-            </View>
-          </View>
-          <View style={styles.row}>
-            <View>
-              <Image source={profileIcon} style={styles.endItems} />
-              <Text style={styles.text}>Profile</Text>
-            </View>
-            <View>
-              <Image source={profileIcon} style={styles.middleItem} />
-              <Text style={styles.text}>Results</Text>
-            </View>
-            <View>
-              <Image source={profileIcon} style={styles.endItems} />
-              <Text style={styles.text}>Results</Text>
-            </View>
-          </View>
+          
+        
         </View>
       </ScrollView>
     </View>

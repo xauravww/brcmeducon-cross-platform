@@ -1,9 +1,9 @@
 const SUBJECTS_ARR = {
     Sem8: {
-      Cse: ['PROJECT-III', 'ML', 'BDA', 'WL&SN'],
-      Ce: ['EC&V', 'GT', 'SD', 'S&HWM'],
-      Ee: ['SEM', 'STA', 'SEA'],
-      Me: ['IA', 'PME', 'PPE', 'AE', 'QE'],
+      CSE: ['PROJECT-III', 'ML', 'BDA', 'WL&SN'],
+      CIVIL: ['EC&V', 'GT', 'SD', 'S&HWM'],
+      EE: ['SEM', 'STA', 'SEA'],
+      ME: ['IA', 'PME', 'PPE', 'AE', 'QE'],
     },
   };
   

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { Button, RadioButton, Text, Title, Snackbar } from 'react-native-paper';
 import SelectDropdown from 'react-native-select-dropdown';
@@ -10,37 +10,67 @@ import { appcolor } from '../constants';
 import moment from 'moment';
 import { fetchSubjectArr } from './subject-utils/subject';
 import API_URL from '../connection/url';
+import { selectRoleContext } from '../context/SelectRoleContext';
+import { selectInputContext } from '../context/SelectorInputsContext';
+import { authContext } from '../context/AuthContextFunction';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const CreateAttendanceScreen = ({ route, navigation }) => {
   const {
-    branchFilter,
     date,
-    subjectFilter,
-    semesterFilter,
     attendanceDataId,
     editAttendance,
     attendanceData,
   } = route.params || {
-    editAttendance: false
+    editAttendance: false,
   };
+  
+  const {
+    branchFilter,
+    setBranchFilter,
+    semesterFilter,
+    setSemesterFilter,
+    dateFilter,
+    setDateFilter,
+    subjectFilter,
+    setSubjectFilter,
+  } = useContext(selectInputContext);
+
+  
 
   const [members, setMembers] = useState([]);
   const [selectedMembers, setSelectedMembers] = useState({});
   const [dateState, setDateState] = useState(new Date());
-  const [semester, setSemester] = useState('');
-  const [branch, setBranch] = useState('');
-  const [subject, setSubject] = useState('');
-  const [subjectArr, setsubjectArr] = useState([])
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { setNavigationState } = useContext(selectRoleContext);
+
+
+  const { authData, setAuthData, setIsLoggedIn } = useContext(authContext);
+
+  const handleLogout = async (message) => {
+    try {
+      await AsyncStorage.removeItem('auth-data');
+      setAuthData({});
+      setIsLoggedIn(false);
+      console.log(message);
+    } catch (e) {
+      console.error("Error removing value:", e);
+    }
+  }
+
+useEffect(()=>{
+  setNavigationState('CreateAttendance')
+})
 
   useEffect(() => {
-    if(attendanceData){
+    if (attendanceData) {
       const initialStatus = {};
-    attendanceData[0].attendanceData.forEach((member) => {
-      initialStatus[member.memberId] = member.status.charAt(0).toUpperCase() + member.status.slice(1);
-    });
-    setSelectedMembers(initialStatus);
+      attendanceData[0].attendanceData.forEach((member) => {
+        initialStatus[member.memberId] = member.status.charAt(0).toUpperCase() + member.status.slice(1);
+      });
+      setSelectedMembers(initialStatus);
     }
   }, [attendanceData]);
 
@@ -48,37 +78,37 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
     const fetchMembers = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(`${API_URL}/api/v1/admin/members`);
+        const response = await axios.get(`${API_URL}/api/v1/admin/members`,{
+          headers: {
+            'Authorization': `Bearer ${authData?.token}`
+          }
+        });
         if (response.data.success) {
-          const filteredMembers = response.data.users.filter((user) => user.branch === branch && user.semester === semester);
+          const filteredMembers = response.data.users.filter((user) => user.branch === branchFilter && user.semester === semesterFilter);
           const sortedMembers = filteredMembers.sort((a, b) => a.rollno.localeCompare(b.rollno));
           setMembers(sortedMembers);
         }
       } catch (error) {
         console.error('Failed to fetch members:', error);
+        if(err.response.status==404){
+          handleLogout("Please Login Again ...")
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (branch && semester) {
+    if (branchFilter && semesterFilter) {
       fetchMembers();
     }
-   const arrdata = fetchSubjectArr(branch,semester)
-   console.log(branch)
-   console.log(semester)
-   console.log(arrdata)
-   setsubjectArr(arrdata)
-  }, [branch, semester]);
+  }, [branchFilter, semesterFilter]);
 
   useEffect(() => {
-    if (branchFilter && semesterFilter && subjectFilter && date && attendanceData) {
-      setBranch(branchFilter);
-      setSemester(semesterFilter);
-      setSubject(subjectFilter);
+    if (branchFilter && semesterFilter && subjectFilter && dateFilter && attendanceData) {
       setDateState(new Date(date));
     }
-  }, []);
+    setNavigationState('CreateAttendance');
+  }, [branchFilter, semesterFilter, subjectFilter, dateFilter]);
 
   const handleRadioButtonChange = (userId, status) => {
     setSelectedMembers((prevSelected) => ({
@@ -106,7 +136,7 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
         remarks: 'none',
       }));
 
-      if (!subject) {
+      if (!subjectFilter) {
         setSnackbarMessage('Subject is required');
         setSnackbarVisible(true);
         setIsLoading(false);
@@ -118,10 +148,11 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
       const requestBody = {
         attendanceData: attendanceDataToSend,
         date: formattedDate,
-        branch,
-        semester,
-        subject,
+        branch: branchFilter,
+        semester: semesterFilter,
+        subject: subjectFilter,
         id: attendanceDataId,
+        token:authData?.token
       };
 
       let endpoint = `${API_URL}/api/v1/faculty/attendance`;
@@ -156,12 +187,20 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
       setSnackbarMessage('Failed to update attendance');
       setSnackbarVisible(true);
       setIsLoading(false);
+
+      if(err.response.status==404){
+                    handleLogout("Please Login Again ...")
+                  }
     }
   };
 
   const handleDelete = async () => {
     try {
-      const response = await axios.delete(`${API_URL}/api/v1/faculty/attendance/${attendanceDataId}`);
+      const response = await axios.delete(`${API_URL}/api/v1/faculty/attendance/${attendanceDataId}`,{
+        headers: {
+          'Authorization': `Bearer ${authData?.token}`
+        }
+      });
 
       if (response.data.success) {
         setSnackbarMessage('Attendance deleted successfully');
@@ -174,6 +213,10 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
       console.error('Error details:', error.response ? error.response.data : error);
       setSnackbarMessage('Failed to delete attendance');
       setSnackbarVisible(true);
+
+      if(err.response.status==404){
+        handleLogout("Please Login Again ...")
+      }
     }
   };
 
@@ -184,8 +227,8 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
       <View style={styles.pickerContainer}>
         <MaterialCommunityIcons name="calendar" color={'black'} size={25} />
         <DatePicker
-          date={dateState}
-          onDateChange={setDateState}
+          date={dateFilter || new Date()}
+          onDateChange={setDateFilter}
           mode="date"
           style={styles.datePicker}
           theme='light'
@@ -196,8 +239,8 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
         <Ionicons name="school-outline" color={'black'} size={25} />
         <SelectDropdown
           data={['Sem1', 'Sem2', 'Sem3', 'Sem4', 'Sem5', 'Sem6', 'Sem7', 'Sem8']}
-          onSelect={(selectedItem, index) => setSemester(selectedItem)}
-          defaultButtonText={semester || 'Select Semester'}
+          onSelect={(selectedItem, index) => setSemesterFilter(selectedItem)}
+          defaultButtonText={semesterFilter || 'Select Semester'}
           buttonTextAfterSelection={(selectedItem) => selectedItem}
           rowTextForSelection={(item) => item}
           style={styles.picker}
@@ -207,9 +250,9 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
       <View style={styles.pickerContainer}>
         <Ionicons name="school-outline" color={'black'} size={25} />
         <SelectDropdown
-          data={['Cse', 'IT', 'ECE', 'ME']}
-          onSelect={(selectedItem, index) => setBranch(selectedItem)}
-          defaultButtonText={branch || 'Select Branch'}
+          data={['CSE', 'CIVIL', 'EE', 'ME']}
+          onSelect={(selectedItem, index) => setBranchFilter(selectedItem)}
+          defaultButtonText={branchFilter || 'Select Branch'}
           buttonTextAfterSelection={(selectedItem) => selectedItem}
           rowTextForSelection={(item) => item}
           style={styles.picker}
@@ -219,9 +262,9 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
       <View style={styles.pickerContainer}>
         <MaterialCommunityIcons name="book" color={'black'} size={25} />
         <SelectDropdown
-          data={subjectArr._j}
-          onSelect={(selectedItem, index) => setSubject(selectedItem)}
-          defaultButtonText={subject || 'Select Subject'}
+          data={fetchSubjectArr(branchFilter, semesterFilter)._j}
+          onSelect={(selectedItem, index) => setSubjectFilter(selectedItem)}
+          defaultButtonText={subjectFilter || 'Select Subject'}
           buttonTextAfterSelection={(selectedItem) => selectedItem}
           rowTextForSelection={(item) => item}
           style={styles.picker}

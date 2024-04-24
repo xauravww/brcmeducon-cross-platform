@@ -10,8 +10,10 @@ function SelectRoleContext({children}) {
  const [role,setRole]=useState({
   Student:true,Faculty:false,Admin:false
  })
+ //to check which screen is opened , so that we can control our header btns
+ const [navigationState, setNavigationState] = useState('')
  const data = {
-    role,setRole
+    role,setRole,navigationState,setNavigationState
  }
     return (
   <selectRoleContext.Provider value={data}>

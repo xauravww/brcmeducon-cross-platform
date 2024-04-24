@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext ,useEffect} from 'react';
 import { StyleSheet, Text, View, Button, Image } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -10,25 +10,57 @@ import FacultyDash from '../components/FacultyDash';
 import SendAssignments from '../components/SendAssignments';
 import ManageAttendance from '../components/ManageAttendance';
 import CreateAttendanceScreen from '../components/CreateAttendanceScreen';
+import { appcolor } from '../constants';
+import SelectRoleContext, { selectRoleContext } from '../context/SelectRoleContext';
+import IDCard from '../components/IDCard';
+import Event from '../components/Event';
 
 const Drawer = createDrawerNavigator();
-const Stack = createNativeStackNavigator();
+const stack = createNativeStackNavigator();
 
 const FacultyHomeStack = () => {
   const navigation = useNavigation();
-  
+ 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='FacultyDash' component={FacultyDash} />
-      <Stack.Screen name='SendAssignments' component={SendAssignments} />
-      <Stack.Screen name='ManageAttendance' component={ManageAttendance} />
-      <Stack.Screen name='CreateAttendanceScreen' component={CreateAttendanceScreen} />
-    </Stack.Navigator>
-  );
+    <stack.Navigator screenOptions={{headerShown:false}}>
+      <stack.Screen name='FacultyDash' component={FacultyDash} />
+      <stack.Group>
+        <stack.Screen name='SendAssignments' component={SendAssignments} options={{
+          title: 'Send Assignmnets',
+          headerRight: () => (
+            <Button
+              onPress={() => navigation.navigate("SendAssignments")}
+              title="Add New"
+              color={appcolor}
+            />
+          ),
+        }} />
+        <stack.Screen name='ManageAttendance' component={ManageAttendance} options={{
+          title: 'Manage Attendance',
+          headerRight: () => (
+            <Button
+              onPress={() => navigation.navigate("CreateAttendanceScreen")}
+              title="Add New"
+              color={appcolor}
+            />
+          ),
+        }} />
+
+      </stack.Group>
+      <stack.Screen name='CreateAttendanceScreen' component={CreateAttendanceScreen} />
+      <stack.Screen name='IDCard' component={IDCard} />
+      <stack.Screen name='Events' component={Event} />
+    </stack.Navigator>
+  )
 };
 
 export default function FacultyStack() {
   const navigation = useNavigation();
+  const { navigationState ,setNavigationState} = useContext(selectRoleContext);
+useEffect(() => {
+  console.log(navigation.getState())
+
+}, [navigation])
 
   return (
     <Drawer.Navigator initialRouteName='FacultyHome'
@@ -37,6 +69,19 @@ export default function FacultyStack() {
         drawerStyle: {
           backgroundColor: '#dadada',
           width: 240,
+        },
+        headerRight: () => {
+          if (navigationState === 'ManageAttendance') {
+            return (
+              <Button
+                onPress={() => navigation.navigate("CreateAttendanceScreen")}
+                title={"Add New"}
+                color={appcolor}
+              />
+            );
+          } else {
+            return null; 
+          }
         },
         drawerType: 'slide',
         drawerHideStatusBarOnOpen: true,
@@ -52,7 +97,15 @@ export default function FacultyStack() {
               navigation.dispatch(DrawerActions.closeDrawer());
             }
           }
-        }
+        },
+        headerStyle: {
+          backgroundColor: appcolor, 
+         
+        },
+        headerTitleStyle:{
+          color:"#ffffff"
+        },
+        headerTintColor: "#ffffff", 
       }}
     >
       <Drawer.Screen name='FacultyHome' component={FacultyHomeStack} />
@@ -66,7 +119,7 @@ function CustomDrawerContent({ navigation }) {
   const handleLogout = async () => {
     try {
       // Remove auth-data from AsyncStorage
-      await AsyncStorage.removeItem('auth-data').then(()=>{
+      await AsyncStorage.removeItem('auth-data').then(() => {
         setAuthData({}); // Clear authData
         setIsLoggedIn(false); // Set isLoggedIn to false
       });
@@ -75,7 +128,7 @@ function CustomDrawerContent({ navigation }) {
     }
   };
 
-  
+
 
   return (
     <View>

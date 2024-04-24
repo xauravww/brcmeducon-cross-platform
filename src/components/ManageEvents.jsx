@@ -2,21 +2,24 @@ import { StyleSheet, Text, View, TextInput, ScrollView, Pressable, TouchableOpac
 import SelectDropdown from 'react-native-select-dropdown';
 import DatePicker from 'react-native-date-picker'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useContext } from 'react';
 import { appcolor } from '../constants';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import axios from 'axios';
 import { compareAsc, format } from "date-fns";
 import LoaderKit from 'react-native-loader-kit'
 import API_URL from '../connection/url';
+import { selectRoleContext } from '../context/SelectRoleContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { authContext } from '../context/AuthContextFunction';
 export default function ManageEvents({ route, navigation }) {
   const [loading, setloading] = useState(false)
   const item = route.params
-  const roleData = ['Student', 'Teacher', 'Admin', 'All'];
-  const holidayData = ['Holiday', 'Event', 'Both']
+  const roleData = ['Student', 'Teacher', 'All'];
+  const holidayData = ['Holiday', 'Event']
   const [selectedLanguage, setSelectedLanguage] = useState();
   const [manageEventsInputs, setmanageEventsInputs] = useState({ name: "", description: "", date: "", time: "", assignTo: "", eventType: "", monthCode: 1, id: "" })
-
+  
   const [date, setDate] = useState(new Date())
   const [open, setOpen] = useState(false)
   const [openTimeModal, setopenTimeModal] = useState(false)
@@ -25,7 +28,22 @@ export default function ManageEvents({ route, navigation }) {
   const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
 
 
+  const { navigationState ,setNavigationState} = useContext(selectRoleContext);
+  setNavigationState("ManageEvents")
 
+  const { authData, setAuthData, setIsLoggedIn } = useContext(authContext);
+
+  const handleLogout = async (message) => {
+    try {
+      await AsyncStorage.removeItem('auth-data');
+      setAuthData({});
+      setIsLoggedIn(false);
+      console.log(message);
+    } catch (e) {
+      console.error("Error removing value:", e);
+    }
+  }
+  
   useEffect(() => {
     if (item) {
       const { name, description, date, assignTo, eventType, time, id, actionType } = item
@@ -34,12 +52,25 @@ export default function ManageEvents({ route, navigation }) {
       if (actionType) {
         setactionType("EDIT")
       }
-
+     
 
 
     }
+    
 
   }, [])
+
+  useEffect(() => {
+    const focusListener = navigation.addListener('focus', () => {
+      setNavigationState("ManageEvents")
+    });
+    focusListener()
+    return () => {
+      focusListener?.remove();
+    };
+  }, [navigation]);
+
+  
 
   const handleInputChange = (inputId, value) => {
     setmanageEventsInputs(prevState => ({
@@ -55,34 +86,44 @@ export default function ManageEvents({ route, navigation }) {
 
   const handleSubmitEvents = () => {
     setloading(true)
-    axios.post(`${API_URL}/api/v1/events1`, { name: manageEventsInputs.name, description: manageEventsInputs.description, date: manageEventsInputs.date, time: manageEventsInputs.time, assignTo: manageEventsInputs.assignTo, eventType: manageEventsInputs.eventType, monthCode: manageEventsInputs.monthCode }).then((res) => {
+    axios.post(`${API_URL}/api/v1/events1`, { name: manageEventsInputs.name, description: manageEventsInputs.description, date: manageEventsInputs.date, time: manageEventsInputs.time, assignTo: manageEventsInputs.assignTo, eventType: manageEventsInputs.eventType, monthCode: manageEventsInputs.monthCode ,token:authData?.token }).then((res) => {
+      console.log("statuscode is ",res.status)
+      
       if (res.data.success) {
         navigation.pop(1)
       }
     }).catch((err) => {
-
+        if(err.response.status==404){
+          handleLogout("Please Login Again ...")
+        }
     })
 
   }
 
   const handleDeleteEvents = ( )=>{
     setloading(true)
-    axios.post(`${API_URL}/api/v1/events1/delete/${manageEventsInputs.id}`).then((res) => {
+    axios.delete(`${API_URL}/api/v1/events1/delete/${manageEventsInputs.id}`).then((res) => {
+      console.log(res.data)
+      console.log("statuscode is ",data.status)
       if (res.data.success) {
         navigation.pop(1)
       }
     }).catch((err) => {
-
+      if(err.response.status==404){
+        handleLogout("Please Login Again ...")
+      }
     })
   }
   const handleEditEvents = ( )=>{
     setloading(true)
-    axios.post(`${API_URL}/api/v1/events1/update/${manageEventsInputs.id}`, { name: manageEventsInputs.name, description: manageEventsInputs.description, date: manageEventsInputs.date, time: manageEventsInputs.time, assignTo: manageEventsInputs.assignTo, eventType: manageEventsInputs.eventType, monthCode: manageEventsInputs.monthCode }).then((res) => {
+    axios.put(`${API_URL}/api/v1/events1/update/${manageEventsInputs.id}`, { name: manageEventsInputs.name, description: manageEventsInputs.description, date: manageEventsInputs.date, time: manageEventsInputs.time, assignTo: manageEventsInputs.assignTo, eventType: manageEventsInputs.eventType, monthCode: manageEventsInputs.monthCode }).then((res) => {
       if (res.data.success) {
         navigation.pop(1)
       }
     }).catch((err) => {
-
+      if(err.response.status==404){
+        handleLogout("Please Login Again ...")
+      }
     })
   }
   //   return(
@@ -191,7 +232,6 @@ export default function ManageEvents({ route, navigation }) {
             </TouchableOpacity>
           </View>
         </View>
-        <Text style={{ color: "black" }}>id is{manageEventsInputs.id}</Text>
         <View
           style={{
             marginTop: 20,

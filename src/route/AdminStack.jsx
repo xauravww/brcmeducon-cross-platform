@@ -9,25 +9,57 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AdminDash from '../components/AdminDash';
 import ManageEvents from '../components/ManageEvents';
 import Event from '../components/Event';
+import MembersComponent from '../components/MembersComponent';
+import ManageMembers from '../components/ManageMembers'
+import { appcolor } from '../constants';
+import { selectRoleContext } from '../context/SelectRoleContext';
+import IDCard from '../components/IDCard';
 
 const Drawer = createDrawerNavigator();
-const Stack = createNativeStackNavigator();
+const stack = createNativeStackNavigator();
 
 const AdminHomeStack = () => {
+  const navigation = useNavigation();
+  const { authData } = useContext(authContext);
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='AdminDash' component={AdminDash} />
-      <Stack.Screen name='ManageEvents' component={ManageEvents} />
-      <Stack.Screen name='Events' component={Event} />
-    </Stack.Navigator>
+    <stack.Navigator screenOptions={{ headerShown: false }}>
+      <stack.Screen name='AdminDash' component={AdminDash} />
+
+      <stack.Screen name='Events' component={Event} options={{
+        title: 'Manage Events',
+        headerRight: () => (
+          <Button
+            onPress={() => navigation.navigate("ManageEvents", { role: authData.member.role })}
+            title="Add New"
+            color={appcolor}
+          />
+        ),
+      }} />
+      <stack.Screen name='ManageEvents' component={ManageEvents} />
+      <stack.Screen name='MembersComponent' component={MembersComponent}
+      
+        options={{
+          title: 'Manage Events',
+          headerRight: () => (
+            <Button
+              onPress={() => navigation.navigate("ManageMembers")}
+              title="Add New"
+              color={appcolor}
+            />
+          ),
+        }} />
+
+      <stack.Screen name='ManageMembers' component={ManageMembers} />
+      <stack.Screen name='IDCard' component={IDCard}/>
+    </stack.Navigator>
   );
 };
 
 export default function AdminStack() {
   const navigation = useNavigation();
-
+  const { navigationState, setNavigationState } = useContext(selectRoleContext);
   return (
-    <Drawer.Navigator initialRouteName='AdminHome'
+    <Drawer.Navigator initialRouteName={navigationState || 'AdminHome'}
       drawerContent={({ navigation }) => <CustomDrawerContent navigation={navigation} />}
       screenOptions={{
         drawerStyle: {
@@ -48,7 +80,29 @@ export default function AdminStack() {
               navigation.dispatch(DrawerActions.closeDrawer());
             }
           }
-        }
+        },
+        headerTitle: navigationState,
+        headerRight: () => {
+          if (navigationState === 'Events') {
+            return (
+              <Button
+                onPress={() => navigation.navigate("ManageEvents")}
+                title={"Add New"}
+                color={appcolor}
+              />
+            );
+          } else {
+            return null;
+          }
+        },
+        headerStyle: {
+          backgroundColor: appcolor, 
+         
+        },
+        headerTitleStyle:{
+          color:"#ffffff"
+        },
+        headerTintColor: "#ffffff", 
       }}
     >
       <Drawer.Screen name='AdminHome' component={AdminHomeStack} />
@@ -62,7 +116,7 @@ function CustomDrawerContent({ navigation }) {
   const handleLogout = async () => {
     try {
       // Remove auth-data from AsyncStorage
-      await AsyncStorage.removeItem('auth-data').then(()=>{
+      await AsyncStorage.removeItem('auth-data').then(() => {
         setAuthData({}); // Clear authData
         setIsLoggedIn(false); // Set isLoggedIn to false
       });

@@ -12,10 +12,25 @@ import timeTableIcon from '../assets/images/7.png';
 import assignmentIcon from '../assets/images/8.png';
 import pyqsIcon from '../assets/images/9.png';
 import profileIcon from '../assets/images/10.png';
+import { selectRoleContext } from '../context/SelectRoleContext';
 
 export default function AdminDash({ navigation }) {
   const { setIsLoggedIn, authData, setAuthData } = useContext(authContext);
+  const { setNavigationState } = useContext(selectRoleContext);
   const [userData, setUserData] = useState(null);
+
+
+  useEffect(() => {
+    const focusListener = navigation.addListener('focus', () => {
+      setNavigationState('AdminDash')
+      
+    });
+
+    // Clean up the listener when the component is unmounted
+    return () => {
+      navigation.removeListener('focus')
+    };
+  }, [navigation]);
 
   const storeData = async () => {
     try {
@@ -52,18 +67,21 @@ export default function AdminDash({ navigation }) {
         <View style={styles.dashContent}>
           <View style={styles.row}>
             <TouchableOpacity
-              onPress={() => navigation.navigate('ManageEvents')}>
+              onPress={() => navigation.navigate('Events',{role:authData.member.role})}>
               <View style={styles.itemWrapper}>
                 <Image source={eventsIcon} style={styles.endItemsActive} />
                 <Text style={styles.text}>Manage Events</Text>
               </View>
             </TouchableOpacity>
-            <View style={styles.itemWrapper}>
-              <Image source={galleryIcon} style={styles.middleItem} />
-              <Text style={styles.text}>Manage Gallery</Text>
+           <TouchableOpacity
+           onPress={() => navigation.navigate('IDCard',{role:authData.member.role})}>
+           <View>
+              <Image source={idCardIcon} style={styles.middleItemActive} />
+              <Text style={styles.text}>ID Card</Text>
             </View>
+           </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => navigation.navigate('ManageMembers')}>
+              onPress={() => navigation.navigate('MembersComponent')}>
               <View style={styles.itemWrapper}>
                 <Image source={alumniIcon} style={styles.endItemsActive} />
                 <Text style={styles.text}>Manage Members</Text>
@@ -71,47 +89,11 @@ export default function AdminDash({ navigation }) {
             </TouchableOpacity>
           </View>
           <View style={styles.row}>
-            <View>
-              <Image source={alumniIcon} style={styles.endItems} />
-              <Text style={styles.text}>Alumni Meet</Text>
-            </View>
-            <View>
-              <Image source={examsIcon} style={styles.middleItem} />
-              <Text style={styles.text}>Exams</Text>
-            </View>
-            <View>
-              <Image source={idCardIcon} style={styles.endItems} />
-              <Text style={styles.text}>ID Card</Text>
-            </View>
+           
+           
+           
           </View>
-          <View style={styles.row}>
-            <View>
-              <Image source={timeTableIcon} style={styles.endItems} />
-              <Text style={styles.text}>Time Table</Text>
-            </View>
-            <View>
-              <Image source={assignmentIcon} style={styles.middleItem} />
-              <Text style={styles.text}>Assignment</Text>
-            </View>
-            <View>
-              <Image source={pyqsIcon} style={styles.endItems} />
-              <Text style={styles.text}>PYQs</Text>
-            </View>
-          </View>
-          <View style={styles.row}>
-            <View>
-              <Image source={profileIcon} style={styles.endItems} />
-              <Text style={styles.text}>Profile</Text>
-            </View>
-            <View>
-              <Image source={profileIcon} style={styles.middleItem} />
-              <Text style={styles.text}>Results</Text>
-            </View>
-            <View>
-              <Image source={profileIcon} style={styles.endItems} />
-              <Text style={styles.text}>Results</Text>
-            </View>
-          </View>
+        
         </View>
       </ScrollView>
     </View>
@@ -176,6 +158,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: 120,
     backgroundColor: "#ccc",
+  },
+  middleItemActive: {
+    height: 120,
+    borderRadius: 10,
+    width: 120,
+    backgroundColor: appcolor,
   },
   row: {
     marginTop: 45,

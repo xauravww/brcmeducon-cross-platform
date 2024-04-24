@@ -48,34 +48,38 @@ export default function Login({ navigation }) {
         email: inputData.email,
         pass: inputData.pass,
       });
-      setAuthData(response.data)
+      
       if(response.data.success) {
-        setAuthData(response.data)
+        setAuthData(response.data);
+        const { role: apiRole } = response.data.member;
+        setRole({
+          Admin: apiRole === 'admin',
+          Student: apiRole === 'student',
+          Faculty: apiRole === 'faculty',
+        });
         setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
       }
-      const { role: apiRole } = response.data.member;
-      setRole({
-        Admin: apiRole === 'admin',
-        Student: apiRole === 'student',
-        Faculty: apiRole === 'faculty',
-      });
     } catch (error) {
       console.error('Login failed:', error);
+      setIsLoggedIn(false);
     } finally {
       setIsLoading(false);
     }
-    setIsLoggedIn(true)
+    
     if (selectedBtn == 'Student') {
-      setinputData({ email: 'student@gmail.com', pass: 'student@123' })
-      setRole({ Admin: false, Student: true, Faculty: false })
+      setinputData({ email: 'student@gmail.com', pass: 'student@123' });
+      setRole({ Admin: false, Student: true, Faculty: false });
     } else if (selectedBtn == 'Admin') {
-      setinputData({ email: 'admin@gmail.com', pass: 'admin@123' })
-      setRole({ Admin: true, Student: false, Faculty: false })
+      setinputData({ email: 'admin@gmail.com', pass: 'admin@123' });
+      setRole({ Admin: true, Student: false, Faculty: false });
     } else if (selectedBtn == 'Faculty') {
-      setinputData({ email: 'faculty@gmail.com', pass: 'faculty@123' })
-      setRole({ Admin: false, Student: false, Faculty: true })
+      setinputData({ email: 'faculty@gmail.com', pass: 'faculty@123' });
+      setRole({ Admin: false, Student: false, Faculty: true });
     }
   };
+  
   return (
     <View style={styles.container}>
       <Image source={Logo} style={styles.logo} />

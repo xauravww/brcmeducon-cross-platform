@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { View, FlatList, Button, Text, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { Card, Title, Paragraph, List, Divider } from 'react-native-paper';
 import axios from 'axios';
@@ -9,6 +9,10 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import moment from 'moment';
 import { fetchSubjectArr } from './subject-utils/subject';
 import API_URL from '../connection/url';
+import { selectRoleContext } from '../context/SelectRoleContext';
+import { selectInputContext } from '../context/SelectorInputsContext';
+import { authContext } from '../context/AuthContextFunction';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // styles
 const styles = {
     pickerContainer: {
@@ -31,15 +35,36 @@ const AttendanceScreen = ({ navigation }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [attendanceData, setAttendanceData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [branchFilter, setBranchFilter] = useState(null);
-    const [semesterFilter, setSemesterFilter] = useState(null);
-    const [dateFilter, setDateFilter] = useState(null);
-    const [subjectFilter, setSubjectFilter] = useState(null);
+
+
+    const {
+        branchFilter,
+        setBranchFilter,
+        semesterFilter,
+        setSemesterFilter,
+        dateFilter,
+        setDateFilter,
+        subjectFilter,
+        setSubjectFilter
+      } = useContext(selectInputContext);
+
+
+    // const [branchFilter, setBranchFilter] = useState(null);
+    // const [semesterFilter, setSemesterFilter] = useState(null);
+    // const [dateFilter, setDateFilter] = useState(null);
+    // const [subjectFilter, setSubjectFilter] = useState(null);
     const [subjectArr, setsubjectArr] = useState([])
     const [members, setMembers] = useState([]);
     const [membersAttendanceStatus, setmembersAttendanceStatus] = useState({});
     const [selectedMembers, setSelectedMembers] = useState([]);
     const flatListRef = useRef(null);
+
+    const { navigationState, setNavigationState } = useContext(selectRoleContext);
+
+    useEffect(() => {
+        setNavigationState('ManageAttendance')
+    }, [])
+
 
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
@@ -53,20 +78,42 @@ const AttendanceScreen = ({ navigation }) => {
     }, []);
 
     useEffect(() => {
-      
-        const arrData = fetchSubjectArr(branchFilter,semesterFilter)
+
+        const arrData = fetchSubjectArr(branchFilter, semesterFilter)
         setsubjectArr(arrData)
-     
-    }, [branchFilter,semesterFilter])
-    
+
+    }, [branchFilter, semesterFilter])
+
+
+    const { authData, setAuthData, setIsLoggedIn } = useContext(authContext);
+
+  const handleLogout = async (message) => {
+    try {
+      await AsyncStorage.removeItem('auth-data');
+      setAuthData({});
+      setIsLoggedIn(false);
+      console.log(message);
+    } catch (e) {
+      console.error("Error removing value:", e);
+    }
+  }
+
+
 
     const fetchMembersData = () => {
-        axios.get(`${API_URL}/api/v1/admin/members`)
+        axios.get(`${API_URL}/api/v1/admin/members`,{
+            headers: {
+                'Authorization': `Bearer ${authData?.token}`
+              }
+        })
             .then(response => {
                 setMembers(response.data.users);
             })
-            .catch(error => {
-                console.error(error);
+            .catch(err => {
+                console.error(err);
+                if(err.response.status==404 || err.response.status==401){
+                    handleLogout("Please Login Again ...")
+                  }
             });
     };
 
@@ -75,14 +122,18 @@ const AttendanceScreen = ({ navigation }) => {
         const bodyData = {
             "date": formattedDate,
             "semester": semesterFilter,
-            "branch": branchFilter
+            "branch": branchFilter,
+            "token":authData?.token
         };
+
+        console.log("bodydata")
+        console.log(bodyData)
 
         axios.post(`${API_URL}/api/v1/faculty/attendance/unique`, bodyData)
             .then(response => {
                 setAttendanceData(response.data.data);
                 setLoading(false);
-
+console.log(response.data.data)
                 const existingAttendanceStatus = {};
 
                 response?.data?.data?.forEach((item) => {
@@ -92,13 +143,33 @@ const AttendanceScreen = ({ navigation }) => {
                 });
 
                 setmembersAttendanceStatus(existingAttendanceStatus);
- 
+
 
             })
-            .catch(error => {
-                console.error(error);
+            .catch(err => {
+                console.error(err);
+                if(err.response.status==404 || err.response.status==401){
+                    handleLogout("Please Login Again ...")
+                  }
             });
     };
+
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            // Your callback function here
+            console.log('Screen is focused');
+            // Execute any logic you want when the screen becomes active
+            setNavigationState('ManageAttendance')
+        fetchAttendanceData()
+
+        });
+        // Clean up the event listener when the component unmounts
+        return unsubscribe;
+    }, [navigation]);
+
+
+
 
     const filteredData = attendanceData.filter(
         item =>
@@ -113,7 +184,7 @@ const AttendanceScreen = ({ navigation }) => {
             <Card.Content>
                 <View style={{ justifyContent: "space-between", flexDirection: "row", alignItems: "center" }}>
                     <Title><Text>{item.subject}</Text></Title>
-                    <TouchableOpacity onPress={() => navigation.navigate("CreateAttendanceScreen", { editAttendance: true, branchFilter, semesterFilter, date: date.toISOString(), subjectFilter, attendanceDataId: attendanceData[0]?._id, attendanceData })}>
+                    <TouchableOpacity onPress={() => navigation.navigate("CreateAttendanceScreen", { editAttendance: true, branchFilter, semesterFilter, date: dateFilter?.toISOString() || new Date().toISOString(), subjectFilter, attendanceDataId: attendanceData[0]?._id, attendanceData })}>
                         <Icon name="pencil-outline" color="green" size={20} />
                     </TouchableOpacity>
                 </View>
@@ -156,11 +227,11 @@ const AttendanceScreen = ({ navigation }) => {
             <View style={styles.pickerContainer}>
                 <Icon name="school-outline" color={'black'} size={25} />
                 <SelectDropdown
-                    data={['Cse', 'Branch', 'OtherBranches']}
+                    data={['CSE', 'CIVIL', 'EE', 'ME']}
                     onSelect={(selectedItem, index) => {
                         setBranchFilter(selectedItem);
                     }}
-                    defaultButtonText="Select Branch"
+                    defaultButtonText={branchFilter || "Select Branch"}
                     style={styles.picker}
                 />
             </View>
@@ -171,7 +242,7 @@ const AttendanceScreen = ({ navigation }) => {
                     onSelect={(selectedItem, index) => {
                         setSemesterFilter(selectedItem);
                     }}
-                    defaultButtonText="Select Semester"
+                    defaultButtonText={semesterFilter || "Select Semester"}
                     style={styles.picker}
                 />
             </View>
@@ -182,15 +253,15 @@ const AttendanceScreen = ({ navigation }) => {
                     onSelect={(selectedItem, index) => {
                         setSubjectFilter(selectedItem);
                     }}
-                    defaultButtonText="Select Subject"
+                    defaultButtonText={subjectFilter || "Select Subject"}
                     style={styles.picker}
                 />
             </View>
             <View style={styles.pickerContainer}>
                 <Icon name="calendar" color={'black'} size={25} />
                 <DatePicker
-                    date={date}
-                    onDateChange={setDate}
+                    date={dateFilter || date}
+                    onDateChange={setDateFilter}
                     mode="date"
                     style={styles.datePicker}
                     theme='light'

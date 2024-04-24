@@ -10,6 +10,8 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { authContext } from '../context/AuthContextFunction';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Login from '../components/Login';
+import IDCard from '../components/IDCard';
+import { appcolor } from '../constants';
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +34,7 @@ const HomeStack = () => {
      <Stack.Group>
      <Stack.Screen name='ShowEvents' component={Event} />
       <Stack.Screen name='StudentAttendance' component={StudentAttendance} />
+      <Stack.Screen name='IDCard' component={IDCard} />
      </Stack.Group>
     </Stack.Navigator>
   );
@@ -65,7 +68,15 @@ export default function StudentStack({}) {
              navigation.dispatch(DrawerActions.closeDrawer());
             }
           }
-        }
+        },
+        headerStyle: {
+          backgroundColor: appcolor, 
+         
+        },
+        headerTitleStyle:{
+          color:"#ffffff"
+        },
+        headerTintColor: "#ffffff", 
       }}
     >
       <Drawer.Screen name='Home' component={HomeStack} />
@@ -89,13 +100,16 @@ function CustomDrawerContent({ navigation }) {
   const {authData,setAuthData,setIsLoggedIn,setlogOutMsg} = useContext(authContext)
   return (
     <View>
-      <Button
-      title="Close"
-      onPress={() => {
-        // Navigate using the `navigation` prop that you received
-        navigation.navigate('Home');
-      }}
-    />
+    
+
+<TouchableOpacity style={{ height: 55,backgroundColor:appcolor,justifyContent:"center",alignItems:"center"}}
+ onPress={() => {
+  // Navigate using the `navigation` prop that you received
+  navigation.navigate('Home');
+}}
+>
+    <Text style={{color:"white",fontSize:20}}>CLOSE</Text>
+</TouchableOpacity>
 
     <View style={{backgroundColor:"#ccc",height:"45%"}}>
     <Image

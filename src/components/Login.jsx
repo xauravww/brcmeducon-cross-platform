@@ -47,9 +47,8 @@ export default function Login({ navigation }) {
   LogBox.ignoreLogs([
     // Exact message
     'ReactImageView: Image source "null" doesn\'t exist',
-  
-    // Substring or regex match
-    /GraphQL error: .*/,
+  'If you want to use Reanimated 2 then go through our installation steps https://docs.swmansion.com/react-native-reanimated/docs/installation',
+   
   ]);
   
 

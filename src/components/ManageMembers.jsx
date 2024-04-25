@@ -12,6 +12,7 @@ import axios from 'axios';
 import Config from '../connection/url';
 import avatarImage from "../assets/images/man_avatar.jpg"
 const ManageEvents = ({ route, navigation }) => {
+  
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
   const [eventData, setEventData] = useState({

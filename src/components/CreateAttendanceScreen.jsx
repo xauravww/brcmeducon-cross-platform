@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, ScrollView, StyleSheet, ActivityIndicator, Dimensions, TouchableOpacity } from 'react-native';
 import { Button, RadioButton, Text, Title, Snackbar } from 'react-native-paper';
 import SelectDropdown from 'react-native-select-dropdown';
 import axios from 'axios';
@@ -37,8 +37,6 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
     attendanceChanged, setAttendanceChanged
   } = useContext(selectInputContext);
 
-  
-
   const [members, setMembers] = useState([]);
   const [selectedMembers, setSelectedMembers] = useState({});
   const [dateState, setDateState] = useState(dateFilter || new Date());
@@ -46,7 +44,6 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { setNavigationState } = useContext(selectRoleContext);
-
 
   const { authData, setAuthData, setIsLoggedIn } = useContext(authContext);
 
@@ -61,9 +58,9 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
     }
   }
 
-useEffect(()=>{
-  setNavigationState('CreateAttendance')
-})
+  useEffect(() => {
+    setNavigationState('CreateAttendance')
+  })
 
   useEffect(() => {
     if (attendanceData) {
@@ -156,8 +153,6 @@ useEffect(()=>{
         token:authData?.token
       };
 
-      console.log("requestbody attendaca add ",dateFilter)
-
       let endpoint = `${API_URL}/api/v1/faculty/attendance`;
 
       if (editAttendance) {
@@ -177,24 +172,21 @@ useEffect(()=>{
         setSnackbarVisible(true);
         setIsLoading(false);
         setAttendanceChanged(true)
-
-       
-          navigation.goBack();
-       
+        navigation.goBack();
       } else {
         setSnackbarMessage('Failed to update attendance');
         setSnackbarVisible(true);
         setIsLoading(false);
       }
     } catch (error) {
-      console.error('Error details:', error.response ? error.response.data : error);
-      setSnackbarMessage('Failed to update attendance');
+      const errorMessage = error.response ? error.response.data.message : 'Failed to update attendance';
+      setSnackbarMessage(errorMessage);
       setSnackbarVisible(true);
       setIsLoading(false);
-
-      if(err.response.status==404){
-                    handleLogout("Please Login Again ...")
-                  }
+  
+      if (error.response && error.response.status === 404) {
+        handleLogout("Please Login Again ...");
+      }
     }
   };
 
@@ -229,7 +221,7 @@ useEffect(()=>{
       <Title style={styles.title}>{editAttendance !== undefined && !editAttendance ? 'Create Attendance' : 'Edit Attendance'}</Title>
 
       <View style={styles.pickerContainer}>
-        <MaterialCommunityIcons name="calendar" color={'black'} size={25} />
+        <MaterialCommunityIcons name="calendar" color={'black'} size={30} />
         <DatePicker
           date={dateFilter || new Date()}
           onDateChange={setDateFilter}
@@ -240,7 +232,7 @@ useEffect(()=>{
       </View>
 
       <View style={styles.pickerContainer}>
-        <Ionicons name="school-outline" color={'black'} size={25} />
+        <Ionicons name="school-outline" color={'black'} size={30} />
         <SelectDropdown
           data={['Sem1', 'Sem2', 'Sem3', 'Sem4', 'Sem5', 'Sem6', 'Sem7', 'Sem8']}
           onSelect={(selectedItem, index) => setSemesterFilter(selectedItem)}
@@ -252,7 +244,7 @@ useEffect(()=>{
       </View>
 
       <View style={styles.pickerContainer}>
-        <Ionicons name="school-outline" color={'black'} size={25} />
+        <Ionicons name="school-outline" color={'black'} size={30} />
         <SelectDropdown
           data={['CSE', 'CIVIL', 'EE', 'ME']}
           onSelect={(selectedItem, index) => setBranchFilter(selectedItem)}
@@ -264,7 +256,7 @@ useEffect(()=>{
       </View>
 
       <View style={styles.pickerContainer}>
-        <MaterialCommunityIcons name="book" color={'black'} size={25} />
+        <MaterialCommunityIcons name="book" color={'black'} size={30} />
         <SelectDropdown
           data={fetchSubjectArr(branchFilter, semesterFilter)._j}
           onSelect={(selectedItem, index) => setSubjectFilter(selectedItem)}
@@ -303,27 +295,27 @@ useEffect(()=>{
       )}
 
       <View style={styles.buttonContainer}>
-        <Button mode="contained" style={styles.markAllButton} onPress={() => handleMarkAll('Present')}>
-          Mark All Present
-        </Button>
-        <Button mode="contained" style={[styles.markAllButton, { backgroundColor: 'red' }]} onPress={() => handleMarkAll('Absent')}>
-          Mark All Absent
-        </Button>
+        <TouchableOpacity style={styles.markAllButton} onPress={() => handleMarkAll('Present')}>
+          <Text style={styles.buttonText}>Mark All Present</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.markAllButton, { backgroundColor: 'red' }]} onPress={() => handleMarkAll('Absent')}>
+          <Text style={styles.buttonText}>Mark All Absent</Text>
+        </TouchableOpacity>
       </View>
 
       {!editAttendance && (
-        <Button mode="contained" style={styles.button} onPress={handleSubmit}>
-          Mark Attendance
-        </Button>
+        <TouchableOpacity style={[styles.button,{marginBottom:50}]} onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Mark Attendance</Text>
+        </TouchableOpacity>
       )}
       {editAttendance && (
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Button mode="contained" style={styles.button} onPress={handleSubmit}>
-            Edit Attendance
-          </Button>
-          <Button mode="contained" style={[styles.button, { backgroundColor: 'red' }]} onPress={handleDelete}>
-            Delete All
-          </Button>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' ,marginBottom:50 }}>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Edit Attendance</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, { backgroundColor: 'red' }]} onPress={handleDelete}>
+            <Text style={styles.buttonText}>Delete All</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -331,6 +323,7 @@ useEffect(()=>{
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
         duration={Snackbar.DURATION_SHORT}
+        style={styles.snackbar}
       >
         {snackbarMessage}
       </Snackbar>
@@ -394,14 +387,32 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 10,
     backgroundColor: appcolor,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 5,
+    height: 50,
   },
   button: {
     marginTop: 20,
     backgroundColor: appcolor,
     marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 5,
+    height: 50,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    paddingHorizontal:5
   },
   loader: {
     marginTop: 20,
+  },
+  snackbar: {
+    top: 0, 
+    marginBottom:Dimensions.get("window").height/2, 
   },
 });
 

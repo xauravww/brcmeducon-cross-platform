@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, LogBox } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authContext } from '../context/AuthContextFunction';
 import { appcolor } from '../constants';
@@ -28,6 +28,14 @@ export default function FacultyDash({ navigation }) {
     // alert(`${authData.member.role} successfully logged in`);
     storeData();
   }
+
+  LogBox.ignoreLogs([
+    // Exact message
+    'ReactImageView: Image source "null" doesn\'t exist',
+  'If you want to use Reanimated 2 then go through our installation steps https://docs.swmansion.com/react-native-reanimated/docs/installation',
+   
+  ]);
+  
 
   return (
     <View style={styles.container}>

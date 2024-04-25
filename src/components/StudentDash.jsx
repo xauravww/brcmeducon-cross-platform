@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, FlatList } from 'react-native';
+import { StyleSheet, Text, View, Image, FlatList, LogBox } from 'react-native';
 import React,{useContext,useEffect} from 'react';
 import manAvatar from '../assets/images/man_avatar.jpg';
 import eventsIcon from '../assets/images/1.png';
@@ -40,7 +40,13 @@ export default  function StudentDash({ navigation }) {
   if (authData.success) {
     storeData(authData); 
   }
-
+  LogBox.ignoreLogs([
+    // Exact message
+    'ReactImageView: Image source "null" doesn\'t exist',
+  'If you want to use Reanimated 2 then go through our installation steps https://docs.swmansion.com/react-native-reanimated/docs/installation',
+   
+  ]);
+  
   return (
     <View style={styles.container}>
      <View style={{padding:10}}>

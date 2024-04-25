@@ -128,12 +128,14 @@ function CustomDrawerContent({ navigation }) {
 
   return (
     <View>
-      <Button
-        title="Close"
-        onPress={() => {
-          navigation.navigate('AdminHome');
-        }}
-      />
+     <TouchableOpacity style={{ height: 55,backgroundColor:appcolor,justifyContent:"center",alignItems:"center"}}
+ onPress={() => {
+  // Navigate using the `navigation` prop that you received
+  navigation.navigate('AdminDash');
+}}
+>
+    <Text style={{color:"white",fontSize:20}}>CLOSE</Text>
+</TouchableOpacity>
 
       <View style={{ backgroundColor: "#ccc", height: "45%" }}>
         <Image

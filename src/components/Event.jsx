@@ -11,6 +11,7 @@ import API_URL from '../connection/url';
 import { appcolor } from '../constants';
 import { selectRoleContext } from '../context/SelectRoleContext';
 import { authContext } from '../context/AuthContextFunction';
+import { selectInputContext } from '../context/SelectorInputsContext';
 
 const Event = ({ route, navigation }) => {
   const { role } = route.params;
@@ -20,6 +21,7 @@ const Event = ({ route, navigation }) => {
   const [pressedItem, setPressedItem] = useState({ display: false, description: "", time: "" });
   const { navigationState, setNavigationState } = useContext(selectRoleContext);
   const { authData, setAuthData, setIsLoggedIn } = useContext(authContext);
+  const { eventsChanged, seteventsChanged } = useContext(selectInputContext);
 
   const handleLogout = async (message) => {
     try {
@@ -32,6 +34,17 @@ const Event = ({ route, navigation }) => {
     }
   }
 
+  useEffect(() => {
+    console.log("eventsChanged value:", eventsChanged);
+    fetchEvents();
+
+    if (eventsChanged) {
+      // Refetch or update events data
+      seteventsChanged(false);  // Reset the flag
+    }
+  }, [navigation, eventsChanged]);
+  
+   
   async function fetchEvents() {
     if (role) setroleType(role);
 
@@ -44,6 +57,7 @@ const Event = ({ route, navigation }) => {
     } else if (authData?.member?.role === "admin") {
       assignToFilter = "All";
     }
+
 
     axios.get(`${API_URL}/api/v1/events1/`, {
       params: {
@@ -61,9 +75,9 @@ const Event = ({ route, navigation }) => {
         dataArr.forEach((itemData) => {
           const { name, description, assignTo, date, eventType, time, _id } = itemData;
 
-          if ((authData?.member?.role === "faculty" && assignTo === "Faculty") ||
-              (authData?.member?.role === "student" && assignTo === "Student") ||
-              (authData?.member?.role === "admin" && (assignTo === "Faculty" || assignTo === "Student"))) {
+          if ((authData?.member?.role === "faculty" && (assignTo === "Faculty" ||assignTo === "All")) ||
+              (authData?.member?.role === "student" && (assignTo === "Student" || assignTo === "All")) ||
+              (authData?.member?.role === "admin" && (assignTo === "Faculty" || assignTo === "Student" || assignTo=="All"))) {
 
             const newDate = convertDateFormat(date);
 
@@ -131,7 +145,7 @@ const Event = ({ route, navigation }) => {
 
     return () => {
       if (focusListener) {
-        focusListener.remove();
+        return focusListener
       }
     };
   }, [navigation]);

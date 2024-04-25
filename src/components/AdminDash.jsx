@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, LogBox } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authContext } from '../context/AuthContextFunction';
 import { appcolor } from '../constants';
@@ -21,6 +21,14 @@ export default function AdminDash({ navigation }) {
   const [userData, setUserData] = useState(null);
 
 
+  LogBox.ignoreLogs([
+    // Exact message
+    'ReactImageView: Image source "null" doesn\'t exist',
+  'If you want to use Reanimated 2 then go through our installation steps https://docs.swmansion.com/react-native-reanimated/docs/installation',
+   
+  ]);
+  
+
 useEffect(() => {
   const focusListener = navigation.addListener('focus', () => {
     setNavigationState('AdminDash');
@@ -29,7 +37,7 @@ useEffect(() => {
   // Clean up the listener when the component is unmounted
   return () => {
     if (focusListener) {
-      focusListener.remove();
+      return focusListener
     }
   };
 }, [navigation]);

@@ -123,7 +123,7 @@ export default function StudentAttendance() {
                     }}
                     showsVerticalScrollIndicator={false}
                     dropdownStyle={styles.dropdownMenuStyle}
-                    defaultButtonText='Select Subject'
+                    defaultButtonText={subject || 'Select Subject'}
                     buttonStyle={styles.dropdownButtonStyle}
                 />
                 <Card style={styles.statsCard}>
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
-        backgroundColor:"#dadada"
+        backgroundColor: "#dadada"
     },
     calendar: {
         borderWidth: 1,

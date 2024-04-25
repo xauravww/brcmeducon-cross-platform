@@ -12,10 +12,12 @@ import API_URL from '../connection/url';
 import { selectRoleContext } from '../context/SelectRoleContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authContext } from '../context/AuthContextFunction';
+import { selectInputContext } from '../context/SelectorInputsContext';
 export default function ManageEvents({ route, navigation }) {
+  const { eventsChanged, seteventsChanged } = useContext(selectInputContext);
   const [loading, setloading] = useState(false)
   const item = route.params
-  const roleData = ['Student', 'Teacher', 'All'];
+  const roleData = ['Student', 'Faculty', 'All'];
   const holidayData = ['Holiday', 'Event']
   const [selectedLanguage, setSelectedLanguage] = useState();
   const [manageEventsInputs, setmanageEventsInputs] = useState({ name: "", description: "", date: "", time: "", assignTo: "", eventType: "", monthCode: 1, id: "" })
@@ -29,7 +31,7 @@ export default function ManageEvents({ route, navigation }) {
 
 
   const { navigationState ,setNavigationState} = useContext(selectRoleContext);
-  setNavigationState("ManageEvents")
+
 
   const { authData, setAuthData, setIsLoggedIn } = useContext(authContext);
 
@@ -45,6 +47,7 @@ export default function ManageEvents({ route, navigation }) {
   }
   
   useEffect(() => {
+    setNavigationState("ManageEvents")
     if (item) {
       const { name, description, date, assignTo, eventType, time, id, actionType } = item
       setmanageEventsInputs({ ...manageEventsInputs, name: name, description: description, date: date, time: time, assignTo: assignTo, eventType: eventType, id: id })
@@ -67,7 +70,7 @@ export default function ManageEvents({ route, navigation }) {
     focusListener()
     return () => {
       if (focusListener) {
-        focusListener.remove();
+        return focusListener
       }
     };
   }, [navigation]);
@@ -93,9 +96,10 @@ export default function ManageEvents({ route, navigation }) {
       
       if (res.data.success) {
         navigation.pop(1)
+        setloading(false)
       }
     }).catch((err) => {
-        if(err.response.status==404){
+        if(err.response.status==404 ||err.response.status==401){
           handleLogout("Please Login Again ...")
         }
     })
@@ -104,26 +108,34 @@ export default function ManageEvents({ route, navigation }) {
 
   const handleDeleteEvents = ( )=>{
     setloading(true)
-    axios.delete(`${API_URL}/api/v1/events1/delete/${manageEventsInputs.id}`).then((res) => {
-      console.log(res.data)
-      console.log("statuscode is ",data.status)
+    axios.delete(`${API_URL}/api/v1/events1/delete/${manageEventsInputs.id}`,{
+      headers:{
+        "Authorization":`Bearer ${authData?.token}`
+      }
+    }).then((res) => {
+      
+      console.log("statuscode is ",res.status)
       if (res.data.success) {
         navigation.pop(1)
+        setloading(false)
       }
     }).catch((err) => {
-      if(err.response.status==404){
+      if(err.response.status==404 ||err.response.status==401){
         handleLogout("Please Login Again ...")
       }
     })
   }
   const handleEditEvents = ( )=>{
     setloading(true)
-    axios.put(`${API_URL}/api/v1/events1/update/${manageEventsInputs.id}`, { name: manageEventsInputs.name, description: manageEventsInputs.description, date: manageEventsInputs.date, time: manageEventsInputs.time, assignTo: manageEventsInputs.assignTo, eventType: manageEventsInputs.eventType, monthCode: manageEventsInputs.monthCode }).then((res) => {
+    axios.put(`${API_URL}/api/v1/events1/update/${manageEventsInputs.id}`, { name: manageEventsInputs.name, description: manageEventsInputs.description, date: manageEventsInputs.date, time: manageEventsInputs.time, assignTo: manageEventsInputs.assignTo, eventType: manageEventsInputs.eventType, monthCode: manageEventsInputs.monthCode ,token:authData?.token }).then((res) => {
       if (res.data.success) {
+        seteventsChanged(true)
         navigation.pop(1)
+        setloading(false)
       }
     }).catch((err) => {
-      if(err.response.status==404){
+      console.log(err)
+      if(err.response.status==404 || err.response.status==401){
         handleLogout("Please Login Again ...")
       }
     })

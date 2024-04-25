@@ -10,9 +10,10 @@ export default function SelectorInputsContext({children}) {
   const [dateFilter, setDateFilter] = useState(new Date());
   const [subjectFilter, setSubjectFilter] = useState(null);
   const [attendanceChanged, setAttendanceChanged] = useState(false);
+  const [eventsChanged, seteventsChanged] = useState(false)
 
  const data = {
-    branchFilter, setBranchFilter,semesterFilter, setSemesterFilter,dateFilter, setDateFilter,subjectFilter, setSubjectFilter,attendanceChanged, setAttendanceChanged
+    branchFilter, setBranchFilter,semesterFilter, setSemesterFilter,dateFilter, setDateFilter,subjectFilter, setSubjectFilter,attendanceChanged, setAttendanceChanged,eventsChanged, seteventsChanged
  }
     return (
   <selectInputContext.Provider value={data}>

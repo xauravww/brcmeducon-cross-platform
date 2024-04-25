@@ -13,7 +13,8 @@ import { selectRoleContext } from '../context/SelectRoleContext';
 import { selectInputContext } from '../context/SelectorInputsContext';
 import { authContext } from '../context/AuthContextFunction';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// styles
+import { appcolor } from '../constants';
+
 const styles = {
     pickerContainer: {
         flexDirection: 'row',
@@ -35,7 +36,11 @@ const AttendanceScreen = ({ navigation }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [attendanceData, setAttendanceData] = useState([]);
     const [loading, setLoading] = useState(true);
-
+    const [subjectArr, setsubjectArr] = useState([])
+    const [members, setMembers] = useState([]);
+    const [membersAttendanceStatus, setmembersAttendanceStatus] = useState({});
+    const [selectedMembers, setSelectedMembers] = useState([]);
+    const flatListRef = useRef(null);
 
     const {
         branchFilter,
@@ -49,23 +54,12 @@ const AttendanceScreen = ({ navigation }) => {
         attendanceChanged, setAttendanceChanged
       } = useContext(selectInputContext);
 
-
-    // const [branchFilter, setBranchFilter] = useState(null);
-    // const [semesterFilter, setSemesterFilter] = useState(null);
-    // const [dateFilter, setDateFilter] = useState(null);
-    // const [subjectFilter, setSubjectFilter] = useState(null);
-    const [subjectArr, setsubjectArr] = useState([])
-    const [members, setMembers] = useState([]);
-    const [membersAttendanceStatus, setmembersAttendanceStatus] = useState({});
-    const [selectedMembers, setSelectedMembers] = useState([]);
-    const flatListRef = useRef(null);
-
     const { navigationState, setNavigationState } = useContext(selectRoleContext);
+    const { authData, setAuthData, setIsLoggedIn } = useContext(authContext);
 
     useEffect(() => {
         setNavigationState('ManageAttendance')
-    }, [])
-
+    }, []);
 
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
@@ -79,27 +73,19 @@ const AttendanceScreen = ({ navigation }) => {
     }, []);
 
     useEffect(() => {
-
         const arrData = fetchSubjectArr(branchFilter, semesterFilter)
         setsubjectArr(arrData)
+    }, [branchFilter, semesterFilter]);
 
-    }, [branchFilter, semesterFilter])
-
-
-    const { authData, setAuthData, setIsLoggedIn } = useContext(authContext);
-
-  const handleLogout = async (message) => {
-    try {
-      await AsyncStorage.removeItem('auth-data');
-      setAuthData({});
-      setIsLoggedIn(false);
-      console.log(message);
-    } catch (e) {
-      console.error("Error removing value:", e);
-    }
-  }
-
-
+    const handleLogout = async (message) => {
+        try {
+            await AsyncStorage.removeItem('auth-data');
+            setAuthData({});
+            setIsLoggedIn(false);
+        } catch (e) {
+            console.error("Error removing value:", e);
+        }
+    };
 
     const fetchMembersData = () => {
         axios.get(`${API_URL}/api/v1/admin/members`,{
@@ -114,7 +100,7 @@ const AttendanceScreen = ({ navigation }) => {
                 console.error(err);
                 if(err.response.status==404 || err.response.status==401){
                     handleLogout("Please Login Again ...")
-                  }
+                }
             });
     };
 
@@ -127,14 +113,10 @@ const AttendanceScreen = ({ navigation }) => {
             "token": authData?.token
         };
     
-        console.log("bodydata")
-        console.log(bodyData)
-    
         axios.post(`${API_URL}/api/v1/faculty/attendance/unique`, bodyData)
             .then(response => {
                 setAttendanceData(response.data.data);
                 setLoading(false);
-                console.log(JSON.stringify(response.data.data))
                 const existingAttendanceStatus = {};
     
                 response?.data?.data?.forEach((item) => {
@@ -153,34 +135,23 @@ const AttendanceScreen = ({ navigation }) => {
                 }
             });
     };
-    
 
     useEffect(() => {
-        if (dateFilter !== null) { // Check if dateFilter is not null or undefined
+        if (dateFilter !== null) {
             fetchAttendanceData();
         }
     }, [dateFilter,attendanceChanged]);
 
     useEffect(() => {
-        // Add a focus event listener to the navigation
         const unsubscribe = navigation.addListener('focus', () => {
-          // Log a message when the screen is focused
-          console.log('Screen is focused');
-          
-          // Set the navigation state to 'ManageAttendance'
           setNavigationState('ManageAttendance');
-          
-          // Fetch attendance data
           fetchAttendanceData();
         });
       
-        // Clean up the event listener when the component unmounts
-        return unsubscribe;
-      }, [navigation,attendanceChanged]);
-      
-
-
-
+        if(unsubscribe){
+            return unsubscribe
+        }
+    }, [navigation,attendanceChanged]);
 
     const filteredData = attendanceData.filter(
         item =>
@@ -236,7 +207,7 @@ const AttendanceScreen = ({ navigation }) => {
             }
         >
             <View style={styles.pickerContainer}>
-                <Icon name="school-outline" color={'black'} size={25} />
+                <Icon name="code-outline" color={'black'} size={30} />
                 <SelectDropdown
                     data={['CSE', 'CIVIL', 'EE', 'ME']}
                     onSelect={(selectedItem, index) => {
@@ -247,7 +218,7 @@ const AttendanceScreen = ({ navigation }) => {
                 />
             </View>
             <View style={styles.pickerContainer}>
-                <Icon name="calendar-outline" color={'black'} size={25} />
+                <Icon name="school-outline" color={'black'} size={30} />
                 <SelectDropdown
                     data={['Sem1', 'Sem2', 'Sem3', 'Sem4', 'Sem5', 'Sem6', 'Sem7', 'Sem8']}
                     onSelect={(selectedItem, index) => {
@@ -258,7 +229,7 @@ const AttendanceScreen = ({ navigation }) => {
                 />
             </View>
             <View style={styles.pickerContainer}>
-                <Icon name="calendar-outline" color={'black'} size={25} />
+                <Icon name="book-outline" color={'black'} size={30} />
                 <SelectDropdown
                     data={subjectArr._j}
                     onSelect={(selectedItem, index) => {
@@ -269,7 +240,7 @@ const AttendanceScreen = ({ navigation }) => {
                 />
             </View>
             <View style={styles.pickerContainer}>
-                <Icon name="calendar" color={'black'} size={25} />
+                <Icon name="calendar" color={'black'} size={35} />
                 <DatePicker
                     date={dateFilter || date}
                     onDateChange={setDateFilter}
@@ -278,7 +249,10 @@ const AttendanceScreen = ({ navigation }) => {
                     theme='light'
                 />
             </View>
-            <Button title="Fetch Data" onPress={fetchAttendanceData} />
+            
+            <TouchableOpacity onPress={fetchAttendanceData} style={{justifyContent:"center",alignItems:"center" ,backgroundColor:appcolor,alignSelf:"center",marginVertical:5}}>
+                <Text style={{color:"white",fontSize:20,padding:5,paddingHorizontal:5,}}>FETCH DATA</Text>
+            </TouchableOpacity>
             {loading ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Title>Loading...</Title>
@@ -289,6 +263,7 @@ const AttendanceScreen = ({ navigation }) => {
                     data={filteredData}
                     renderItem={renderItem}
                     keyExtractor={(item) => item?._id}
+                    style={{marginVertical:5}}
                 />
             )}
             {!loading && filteredData.length === 0 && (

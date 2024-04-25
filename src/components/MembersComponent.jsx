@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import { Card, Title, Paragraph, Button, Searchbar, Divider, Portal, Modal } from 'react-native-paper';
 import SelectDropdown from 'react-native-select-dropdown';
 import axios from 'axios';
 import { Provider as PaperProvider } from 'react-native-paper';
-
+import API_URL from "../connection/url"
+import { authContext } from '../context/AuthContextFunction';
 const MembersComponent = () => {
     const [members, setMembers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -12,11 +13,13 @@ const MembersComponent = () => {
     const [selectedBranch, setSelectedBranch] = useState('');
     const [selectedSemester, setSelectedSemester] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
-
+const { authData} = useContext(authContext)
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('https://backendbrcmeducon.onrender.com/api/v1/admin/members');
+                const response = await axios.get(`${API_URL}/api/v1/admin/members`,{headers:{
+                    "Authorization":`Bearer ${authData?.token}`
+                }});
                 setMembers(response.data.users);
             } catch (error) {
                 console.error('Error fetching data:', error);

@@ -11,7 +11,7 @@ import timeTableIcon from '../assets/images/7.png';
 import assignmentIcon from '../assets/images/8.png';
 import pyqsIcon from '../assets/images/9.png';
 import profileIcon from '../assets/images/10.png';
-
+import avatarImage from "../assets/images/man_avatar.jpg"
 export default function FacultyDash({ navigation }) {
   const { setIsLoggedIn, authData, setAuthData } = useContext(authContext);
 
@@ -39,7 +39,7 @@ export default function FacultyDash({ navigation }) {
           <Text style={styles.textMetaDetail}>ID:{ authData.member?.rollno} | FACULTY</Text>
         </View>
         <View>
-          <Image source={{uri:authData.member?.imageurl?.url}} style={styles.imgAvatar} />
+          <Image source={{uri:authData.member?.imageurl?.url}} style={styles.imgAvatar} defaultSource={avatarImage} />
         </View>
       </View>
       </View>

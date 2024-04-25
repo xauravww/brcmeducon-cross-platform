@@ -45,7 +45,8 @@ const AttendanceScreen = ({ navigation }) => {
         dateFilter,
         setDateFilter,
         subjectFilter,
-        setSubjectFilter
+        setSubjectFilter,
+        attendanceChanged, setAttendanceChanged
       } = useContext(selectInputContext);
 
 
@@ -118,55 +119,65 @@ const AttendanceScreen = ({ navigation }) => {
     };
 
     const fetchAttendanceData = () => {
-        const formattedDate = moment(date).format('YYYY-MM-DD');
+        const formattedDate = moment(dateFilter || date).format('YYYY-MM-DD');
         const bodyData = {
             "date": formattedDate,
             "semester": semesterFilter,
             "branch": branchFilter,
-            "token":authData?.token
+            "token": authData?.token
         };
-
+    
         console.log("bodydata")
         console.log(bodyData)
-
+    
         axios.post(`${API_URL}/api/v1/faculty/attendance/unique`, bodyData)
             .then(response => {
                 setAttendanceData(response.data.data);
                 setLoading(false);
-console.log(response.data.data)
+                console.log(JSON.stringify(response.data.data))
                 const existingAttendanceStatus = {};
-
+    
                 response?.data?.data?.forEach((item) => {
                     item.attendanceData.forEach((member) => {
                         existingAttendanceStatus[member._id] = membersAttendanceStatus[member._id] || 'Present';
                     });
                 });
-
+    
                 setmembersAttendanceStatus(existingAttendanceStatus);
-
-
+    
             })
             .catch(err => {
                 console.error(err);
-                if(err.response.status==404 || err.response.status==401){
+                if (err.response.status == 404 || err.response.status == 401) {
                     handleLogout("Please Login Again ...")
-                  }
+                }
             });
     };
-
+    
 
     useEffect(() => {
-        const unsubscribe = navigation.addListener('focus', () => {
-            // Your callback function here
-            console.log('Screen is focused');
-            // Execute any logic you want when the screen becomes active
-            setNavigationState('ManageAttendance')
-        fetchAttendanceData()
+        if (dateFilter !== null) { // Check if dateFilter is not null or undefined
+            fetchAttendanceData();
+        }
+    }, [dateFilter,attendanceChanged]);
 
+    useEffect(() => {
+        // Add a focus event listener to the navigation
+        const unsubscribe = navigation.addListener('focus', () => {
+          // Log a message when the screen is focused
+          console.log('Screen is focused');
+          
+          // Set the navigation state to 'ManageAttendance'
+          setNavigationState('ManageAttendance');
+          
+          // Fetch attendance data
+          fetchAttendanceData();
         });
+      
         // Clean up the event listener when the component unmounts
         return unsubscribe;
-    }, [navigation]);
+      }, [navigation,attendanceChanged]);
+      
 
 
 

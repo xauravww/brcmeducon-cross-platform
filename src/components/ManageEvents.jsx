@@ -66,7 +66,9 @@ export default function ManageEvents({ route, navigation }) {
     });
     focusListener()
     return () => {
-      focusListener?.remove();
+      if (focusListener) {
+        focusListener.remove();
+      }
     };
   }, [navigation]);
 

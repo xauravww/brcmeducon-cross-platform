@@ -10,7 +10,7 @@ import {
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
 import Config from '../connection/url';
-
+import avatarImage from "../assets/images/man_avatar.jpg"
 const ManageEvents = ({ route, navigation }) => {
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
@@ -116,6 +116,7 @@ const ManageEvents = ({ route, navigation }) => {
           source={{ uri: image?.assets[0]?.uri  }}
           style={styles.image}
           onError={(e) => console.log('Image Load Error:', e.nativeEvent.error)}
+          defaultSource={avatarImage}
         />
       )}
 

@@ -1,3 +1,5 @@
+
+
 import {
   StyleSheet,
   Text,
@@ -6,7 +8,8 @@ import {
   Button,
   TextInput,
   Pressable,
-  ActivityIndicator
+  ActivityIndicator,
+  ScrollView
 } from 'react-native';
 import React, { useContext, useState ,useEffect} from 'react';
 import Logo from '../assets/images/brcm_logo_big.png';
@@ -18,11 +21,13 @@ import { selectRoleContext } from '../context/SelectRoleContext';
 import axios from 'axios';
 import API_URL from '../connection/url';
 import { Snackbar } from 'react-native-paper';
+import avatarImage from "../assets/images/man_avatar.jpg"
+import {LogBox} from 'react-native';
 export default function Login({ navigation }) {
   const [selectedBtn, setselectedBtn] = useState('Student');
   const { setIsLoggedIn,authData,setAuthData ,logOutMsg,setlogOutMsg } = useContext(authContext);
   const { role, setRole } = useContext(selectRoleContext);
-  const [inputData, setinputData] = useState({ email: 'student@gmail.com', pass: 'student@123' });
+  const [inputData, setinputData] = useState({ email: 'student@gmail.com', pass: 'saurav@123' });
   const [isLoading, setIsLoading] = useState(false);
 
 
@@ -38,6 +43,14 @@ export default function Login({ navigation }) {
       setVisible('false')
     },100)
   }, [logOutMsg])
+  
+  LogBox.ignoreLogs([
+    // Exact message
+    'ReactImageView: Image source "null" doesn\'t exist',
+  
+    // Substring or regex match
+    /GraphQL error: .*/,
+  ]);
   
 
   
@@ -62,14 +75,17 @@ export default function Login({ navigation }) {
         setIsLoggedIn(false);
       }
     } catch (error) {
-      console.error('Login failed:', error);
       setIsLoggedIn(false);
+    if (error.response && error.response.status === 401) {
+      onToggleSnackBar();
+      setlogOutMsg('Authentication failed. Please check your credentials.');
+    }
     } finally {
       setIsLoading(false);
     }
     
     if (selectedBtn == 'Student') {
-      setinputData({ email: 'student@gmail.com', pass: 'student@123' });
+      setinputData({ email: 'student@gmail.com', pass: 'saurav@123' });
       setRole({ Admin: false, Student: true, Faculty: false });
     } else if (selectedBtn == 'Admin') {
       setinputData({ email: 'admin@gmail.com', pass: 'admin@123' });
@@ -81,8 +97,9 @@ export default function Login({ navigation }) {
   };
   
   return (
-    <View style={styles.container}>
-      <Image source={Logo} style={styles.logo} />
+   <ScrollView>
+     <View style={styles.container}>
+      <Image source={Logo} style={styles.logo} defaultSource={avatarImage} />
 
       <View style={styles.btnWrapper}>
         <View
@@ -100,7 +117,7 @@ export default function Login({ navigation }) {
             }>
             <Text
               onPress={() => {setselectedBtn('Student')
-              setinputData({ email: 'student@gmail.com', pass: 'student@123' })
+              setinputData({ email: 'student@gmail.com', pass: 'saurav@123' })
             }}
               style={
                 selectedBtn == 'Student'
@@ -159,6 +176,7 @@ export default function Login({ navigation }) {
             style={styles.textInput}
             value={inputData.email}
             onChangeText={(text) => setinputData({ ...inputData, email: text })}
+            cursorColor="black"
           />
         </View>
         <View style={[styles.inputWrapper, { marginTop: 3 }]}>
@@ -169,6 +187,7 @@ export default function Login({ navigation }) {
             style={styles.textInput}
             value={inputData.pass}
             onChangeText={(text) => setinputData({ ...inputData, pass: text })}
+            cursorColor="black"
           />
         </View>
       </View>
@@ -196,6 +215,7 @@ export default function Login({ navigation }) {
       </Snackbar>
     )}
     </View>
+   </ScrollView>
   );
 }
 
@@ -275,6 +295,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     alignItems: 'center',
     borderRadius: 5,
+    color:"black"
   },
 
   button: {

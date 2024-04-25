@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
-import { appcolor, conatainerColor } from './constants';
+import { appcolor, containerColor } from './constants';
 
 import Router from './route/Router';
 import AuthContextFunction from './context/AuthContextFunction';
@@ -28,7 +28,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: conatainerColor,
+    backgroundColor: containerColor,
     // color:"#000"
   },
 });

@@ -130,7 +130,9 @@ const Event = ({ route, navigation }) => {
     });
 
     return () => {
-      focusListener?.remove();
+      if (focusListener) {
+        focusListener.remove();
+      }
     };
   }, [navigation]);
 

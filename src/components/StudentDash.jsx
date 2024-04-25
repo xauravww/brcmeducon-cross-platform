@@ -11,8 +11,9 @@ import timeTableIcon from '../assets/images/7.png';
 import assignmentIcon from '../assets/images/8.png';
 import pyqsIcon from '../assets/images/9.png';
 import profileIcon from '../assets/images/10.png';
+import avatarImage from "../assets/images/man_avatar.jpg"
 import { itemData } from '../utils/data';
-import { appcolor } from '../constants';
+import { appcolor ,containerColor } from '../constants';
 import { ScrollView } from 'react-native';
 import { TouchableOpacity } from 'react-native';
 import { Alert } from 'react-native';
@@ -53,6 +54,7 @@ export default  function StudentDash({ navigation }) {
       <Image 
   source={{ uri: authData.member?.imageurl?.url }}
   style={styles.imgAvatar}
+  defaultSource={avatarImage}
   onError={() => alert('Image loading failed')}
 />
       </View>
@@ -78,7 +80,7 @@ export default  function StudentDash({ navigation }) {
               onPress={() => navigation.navigate('StudentAttendance')}
             >
               <View style={styles.itemWrapper}>
-                <Image source={galleryIcon} style={styles.middleItem} />
+                <Image source={galleryIcon} style={styles.middleItemActive} />
                 <Text style={styles.text}>My Attendances</Text>
               </View>
             </TouchableOpacity>
@@ -106,7 +108,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 6,
     flex: 1,
-    // backgroundColor: 'black',
+    backgroundColor: containerColor,
   },
   nameCard: {
     width: '100%',

@@ -12,6 +12,7 @@ import timeTableIcon from '../assets/images/7.png';
 import assignmentIcon from '../assets/images/8.png';
 import pyqsIcon from '../assets/images/9.png';
 import profileIcon from '../assets/images/10.png';
+import avatarImage from "../assets/images/man_avatar.jpg"
 import { selectRoleContext } from '../context/SelectRoleContext';
 
 export default function AdminDash({ navigation }) {
@@ -20,17 +21,19 @@ export default function AdminDash({ navigation }) {
   const [userData, setUserData] = useState(null);
 
 
-  useEffect(() => {
-    const focusListener = navigation.addListener('focus', () => {
-      setNavigationState('AdminDash')
-      
-    });
+useEffect(() => {
+  const focusListener = navigation.addListener('focus', () => {
+    setNavigationState('AdminDash');
+  });
 
-    // Clean up the listener when the component is unmounted
-    return () => {
-      navigation.removeListener('focus')
-    };
-  }, [navigation]);
+  // Clean up the listener when the component is unmounted
+  return () => {
+    if (focusListener) {
+      focusListener.remove();
+    }
+  };
+}, [navigation]);
+
 
   const storeData = async () => {
     try {
@@ -59,7 +62,7 @@ export default function AdminDash({ navigation }) {
           <Text style={styles.textMetaDetail}>ID:{ authData.member?.rollno} | ADMIN</Text>
         </View>
         <View>
-          <Image source={{uri:authData.member?.imageurl?.url}} style={styles.imgAvatar} />
+          <Image source={{uri:authData.member?.imageurl?.url}} style={styles.imgAvatar} defaultSource={avatarImage} />
         </View>
       </View>
       </View>

@@ -34,13 +34,14 @@ const CreateAttendanceScreen = ({ route, navigation }) => {
     setDateFilter,
     subjectFilter,
     setSubjectFilter,
+    attendanceChanged, setAttendanceChanged
   } = useContext(selectInputContext);
 
   
 
   const [members, setMembers] = useState([]);
   const [selectedMembers, setSelectedMembers] = useState({});
-  const [dateState, setDateState] = useState(new Date());
+  const [dateState, setDateState] = useState(dateFilter || new Date());
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -105,7 +106,7 @@ useEffect(()=>{
 
   useEffect(() => {
     if (branchFilter && semesterFilter && subjectFilter && dateFilter && attendanceData) {
-      setDateState(new Date(date));
+      setDateState(new Date(dateFilter));
     }
     setNavigationState('CreateAttendance');
   }, [branchFilter, semesterFilter, subjectFilter, dateFilter]);
@@ -143,7 +144,7 @@ useEffect(()=>{
         return;
       }
 
-      const formattedDate = moment(dateState).format('YYYY-MM-DD');
+      const formattedDate = moment(dateFilter).format('YYYY-MM-DD');
 
       const requestBody = {
         attendanceData: attendanceDataToSend,
@@ -154,6 +155,8 @@ useEffect(()=>{
         id: attendanceDataId,
         token:authData?.token
       };
+
+      console.log("requestbody attendaca add ",dateFilter)
 
       let endpoint = `${API_URL}/api/v1/faculty/attendance`;
 
@@ -173,10 +176,11 @@ useEffect(()=>{
         setSnackbarMessage('Attendance updated successfully');
         setSnackbarVisible(true);
         setIsLoading(false);
+        setAttendanceChanged(true)
 
-        if (editAttendance) {
+       
           navigation.goBack();
-        }
+       
       } else {
         setSnackbarMessage('Failed to update attendance');
         setSnackbarVisible(true);

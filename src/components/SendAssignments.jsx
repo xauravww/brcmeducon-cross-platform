@@ -3,11 +3,11 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Card } from 'react-native-paper'
 import SelectDropdown from 'react-native-select-dropdown'
-
+import API_URL from "../connection/url"
 export default function SendAssignments() {
   const [assignments, setassignments] = useState([])
   useEffect(() => {
-    axios.get('http://sources-pee.gl.at.ply.gg:63207/api/v1/faculty/assignment')
+    axios.get(`${API_URL}/api/v1/faculty/assignment`)
     .then(res => {
       console.log(res.data)
       setassignments(res.data.data)

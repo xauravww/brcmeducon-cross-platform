@@ -4,7 +4,7 @@ import { Snackbar } from 'react-native-paper';
 import axios from 'axios';
 import Loader from 'react-native-loader-kit'; // Import loader component
 import { appcolor } from '../constants';
-
+import API_URL from "../connection/url"
 export default function ForgotPassword({navigation}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,6 +16,8 @@ export default function ForgotPassword({navigation}) {
   const [validEmail, setValidEmail] = useState(true);
   const [loading, setLoading] = useState(false); // State for loader
 
+
+
   const handleForgotPassword = async () => {
     if (!validateEmail(email)) {
       setValidEmail(false);
@@ -24,7 +26,7 @@ export default function ForgotPassword({navigation}) {
 
     try {
       setLoading(true); // Show loader while sending email
-      const response = await axios.post('http://sources-pee.gl.at.ply.gg:63207/api/v1/password/forgot', {
+      const response = await axios.post(`${API_URL}/api/v1/password/forgot`, {
         email: email
       });
 
@@ -48,7 +50,7 @@ export default function ForgotPassword({navigation}) {
   const handleVerifyCode = async () => {
     try {
       setLoading(true); // Show loader while verifying code
-      const response = await axios.put('http://sources-pee.gl.at.ply.gg:63207/api/v1/password/reset', {
+      const response = await axios.put(`${API_URL}/api/v1/password/reset`, {
         email: email,
         randomPass: verificationCode,
         password: password,

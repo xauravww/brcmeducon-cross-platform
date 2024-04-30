@@ -318,7 +318,7 @@ useEffect(()=>{
       formData.append("branch", memberData.branch);
       setLoading(true)
 
-      const response = await axios.post(`http://sources-pee.gl.at.ply.gg:63207/api/v1/register`, formData, {
+      const response = await axios.post(`${API_URL}/api/v1/register`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -363,7 +363,7 @@ useEffect(()=>{
 
       setLoading(true)
       // Make the PUT request
-      const response = await axios.put('http://sources-pee.gl.at.ply.gg:63207/api/v1/admin/me/update', formData, {
+      const response = await axios.put(`${API_URL}/api/v1/admin/me/update`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           "Authorization": `Bearer ${authData?.token}`
@@ -389,7 +389,7 @@ useEffect(()=>{
   const handleDeleteEvents = async () => {
     setLoading(true);
     try {
-      const response = await axios.delete(`http://sources-pee.gl.at.ply.gg:63207/api/v1/admin/user/${id}`, {
+      const response = await axios.delete(`${API_URL}/api/v1/admin/user/${id}`, {
         headers: {
           "Authorization": `Bearer ${authData?.token}`
         },

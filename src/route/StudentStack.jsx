@@ -1,5 +1,5 @@
-import React,{useContext} from 'react';
-import { StyleSheet, Text, View, Button ,Image } from 'react-native';
+import React, { useContext } from 'react';
+import { StyleSheet, Text, View, Button, Image } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import StudentDash from '../components/StudentDash';
@@ -21,28 +21,28 @@ const HomeStack = () => {
     const unsubscribe = navigation.addListener('drawerItemPress', (e) => {
       // Prevent default behavior
       e.preventDefault();
-  console.log(e)
+      console.log(e)
       // Do something manually
       // ...
     });
-  
+
     return unsubscribe;
   }, [navigation]);
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name='StudentDash' component={StudentDash} />
-     <Stack.Group>
-     <Stack.Screen name='ShowEvents' component={Event} />
-      <Stack.Screen name='StudentAttendance' component={StudentAttendance} />
-      <Stack.Screen name='IDCard' component={IDCard} />
-     </Stack.Group>
+      <Stack.Group>
+        <Stack.Screen name='ShowEvents' component={Event} />
+        <Stack.Screen name='StudentAttendance' component={StudentAttendance} />
+        <Stack.Screen name='IDCard' component={IDCard} />
+      </Stack.Group>
     </Stack.Navigator>
   );
 };
 
-export default function StudentStack({}) {
+export default function StudentStack({ }) {
   const navigation = useNavigation()
-  
+
   return (
     <Drawer.Navigator initialRouteName='Home'
       drawerContent={({ navigation }) => <CustomDrawerContent navigation={navigation} />}
@@ -56,7 +56,7 @@ export default function StudentStack({}) {
         swipeEnabled: true,
         swipeEdgeWidth: 100,
         gestureHandlerProps: {
-          onGestureEvent: ({ nativeEvent}) => {
+          onGestureEvent: ({ nativeEvent }) => {
             // Custom gesture handling logic
             if (nativeEvent.absoluteX > 100 && nativeEvent.velocityX > 0.5) {
               console.log('Swiped to open drawer');
@@ -64,19 +64,19 @@ export default function StudentStack({}) {
               navigation.dispatch(DrawerActions.openDrawer());
             } else if (nativeEvent.absoluteX < 50 && nativeEvent.velocityX < -0.5) {
               console.log('Swiped to close drawer');
-             console.log(navigation.getCurrentRoute())
-             navigation.dispatch(DrawerActions.closeDrawer());
+              console.log(navigation.getCurrentRoute())
+              navigation.dispatch(DrawerActions.closeDrawer());
             }
           }
         },
         headerStyle: {
-          backgroundColor: appcolor, 
-         
+          backgroundColor: appcolor,
+
         },
-        headerTitleStyle:{
-          color:"#ffffff"
+        headerTitleStyle: {
+          color: "#ffffff"
         },
-        headerTintColor: "#ffffff", 
+        headerTintColor: "#ffffff",
       }}
     >
       <Drawer.Screen name='Home' component={HomeStack} />
@@ -85,54 +85,48 @@ export default function StudentStack({}) {
 }
 
 function CustomDrawerContent({ navigation }) {
-  const handleLogout = async () => {
-    try {
-      // Remove auth-data from AsyncStorage
-      await AsyncStorage.removeItem('auth-data').then(()=>{
-        setAuthData({}); // Clear authData
-        setIsLoggedIn(false); // Set isLoggedIn to false
-      });
-    } catch (e) {
-      console.error("Error removing value:", e);
-    }
+  const handleLogout = () => {
+    AsyncStorage.clear().then(()=>{
+      setIsLoggedIn(false)
+      setAuthData({})
+    })
   };
-
-  const {authData,setAuthData,setIsLoggedIn,setlogOutMsg} = useContext(authContext)
+  const { authData, setAuthData, setIsLoggedIn, setlogOutMsg } = useContext(authContext)
   return (
     <View>
-    
 
-<TouchableOpacity style={{ height: 55,backgroundColor:appcolor,justifyContent:"center",alignItems:"center"}}
- onPress={() => {
-  // Navigate using the `navigation` prop that you received
-  navigation.navigate('Home');
-}}
->
-    <Text style={{color:"white",fontSize:20}}>CLOSE</Text>
-</TouchableOpacity>
 
-    <View style={{backgroundColor:"#ccc",height:"45%"}}>
-    <Image
-    source={require('../assets/images/brcm_logo_big.png')}
-    style={{height:200,width:200,marginLeft:20}}
-    />
-    </View>
-    <TouchableOpacity
-    onPress={() => {
-      // Navigate using the `navigation` prop that you received
-     
-    setlogOutMsg('You have been logged out')
-     handleLogout()
-    //  navigation.navigate('Home');
-    }}
-    >
-    <View style={{backgroundColor:"#ccc",marginTop:10}}>
-    <Text style={{color:"black" ,fontSize:20,fontFamily:"NotoSans_Condensed-Regular",padding:10}}>
-      Log Out
-    </Text>
-    </View>
-    </TouchableOpacity>
-   
+      <TouchableOpacity style={{ height: 55, backgroundColor: appcolor, justifyContent: "center", alignItems: "center" }}
+        onPress={() => {
+          // Navigate using the `navigation` prop that you received
+          navigation.navigate('Home');
+        }}
+      >
+        <Text style={{ color: "white", fontSize: 20 }}>CLOSE</Text>
+      </TouchableOpacity>
+
+      <View style={{ backgroundColor: "#ccc", height: "45%" }}>
+        <Image
+          source={require('../assets/images/brcm_logo_big.png')}
+          style={{ height: 200, width: 200, marginLeft: 20 }}
+        />
+      </View>
+      <TouchableOpacity
+        onPress={() => {
+          // Navigate using the `navigation` prop that you received
+
+          setlogOutMsg('You have been logged out')
+          handleLogout()
+          //  navigation.navigate('Home');
+        }}
+      >
+        <View style={{ backgroundColor: "#ccc", marginTop: 10 }}>
+          <Text style={{ color: "black", fontSize: 20, fontFamily: "NotoSans_Condensed-Regular", padding: 10 }}>
+            Log Out
+          </Text>
+        </View>
+      </TouchableOpacity>
+
     </View>
   );
 }

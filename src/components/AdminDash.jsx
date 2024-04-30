@@ -24,73 +24,67 @@ export default function AdminDash({ navigation }) {
   LogBox.ignoreLogs([
     // Exact message
     'ReactImageView: Image source "null" doesn\'t exist',
-  'If you want to use Reanimated 2 then go through our installation steps https://docs.swmansion.com/react-native-reanimated/docs/installation',
-   
+    'If you want to use Reanimated 2 then go through our installation steps https://docs.swmansion.com/react-native-reanimated/docs/installation',
+
   ]);
-  
 
-useEffect(() => {
-  const focusListener = navigation.addListener('focus', () => {
-    setNavigationState('AdminDash');
-  });
 
-  // Clean up the listener when the component is unmounted
-  return () => {
-    if (focusListener) {
-      return focusListener
-    }
-  };
-}, [navigation]);
+  useEffect(() => {
+    const focusListener = navigation.addListener('focus', () => {
+      setNavigationState('AdminDash');
+    });
+
+    return () => {
+      if (focusListener) {
+        return focusListener
+      }
+    };
+  }, [navigation]);
+
+  useEffect(() => {
+    storeData(); // Call storeData when authData updates
+  }, [authData]);
 
 
   const storeData = async () => {
     try {
       const jsonValue = JSON.stringify(authData);
       await AsyncStorage.setItem('auth-data', jsonValue);
-      setUserData(authData.member);
     } catch (e) {
       console.error("Error saving value:", e);
     }
-
-
-  if (authData.success) {
-    // alert(`${authData.member.role} successfully logged in`);
-    storeData();
-    };
-    
-    
-  }
+  };
   return (
     <View style={styles.container}>
-      <View style={{padding:10}}>
-      <View style={styles.nameCard}>
-        <View>
-          <Text style={styles.name}>Hello,</Text>
-          <Text style={styles.name}>{ authData.member?.name}</Text>
-          <Text style={styles.textMetaDetail}>ID:{ authData.member?.rollno} | ADMIN</Text>
+      <View style={{ padding: 10 }}>
+        <View style={styles.nameCard}>
+          <View>
+            <Text style={styles.name}>Hello,</Text>
+            <Text style={styles.name}>{authData.member?.name}</Text>
+            <Text style={styles.textMetaDetail}>ID:{authData.member?.rollno} | ADMIN</Text>
+          </View>
+          <View>
+            <Image source={{ uri: authData.member?.imageurl?.url }} style={styles.imgAvatar} defaultSource={avatarImage} />
+          </View>
         </View>
-        <View>
-          <Image source={{uri:authData.member?.imageurl?.url}} style={styles.imgAvatar} defaultSource={avatarImage} />
-        </View>
-      </View>
       </View>
       <ScrollView>
         <View style={styles.dashContent}>
           <View style={styles.row}>
             <TouchableOpacity
-              onPress={() => navigation.navigate('Events',{role:authData.member.role})}>
+              onPress={() => navigation.navigate('Events', { role: authData.member.role })}>
               <View style={styles.itemWrapper}>
                 <Image source={eventsIcon} style={styles.endItemsActive} />
                 <Text style={styles.text}>Manage Events</Text>
               </View>
             </TouchableOpacity>
-           <TouchableOpacity
-           onPress={() => navigation.navigate('IDCard',{role:authData.member.role})}>
-           <View>
-              <Image source={idCardIcon} style={styles.middleItemActive} />
-              <Text style={styles.text}>ID Card</Text>
-            </View>
-           </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('IDCard', { role: authData.member.role })}>
+              <View>
+                <Image source={idCardIcon} style={styles.middleItemActive} />
+                <Text style={styles.text}>ID Card</Text>
+              </View>
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={() => navigation.navigate('MembersComponent')}>
               <View style={styles.itemWrapper}>
@@ -100,11 +94,11 @@ useEffect(() => {
             </TouchableOpacity>
           </View>
           <View style={styles.row}>
-           
-           
-           
+
+
+
           </View>
-        
+
         </View>
       </ScrollView>
     </View>

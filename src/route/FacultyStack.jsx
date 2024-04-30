@@ -114,20 +114,14 @@ useEffect(() => {
 }
 
 function CustomDrawerContent({ navigation }) {
-  const { setAuthData, setIsLoggedIn, setlogOutMsg } = useContext(authContext);
+  const { setAuthData, setIsLoggedIn, setlogOutMsg,authData } = useContext(authContext);
 
-  const handleLogout = async () => {
-    try {
-      // Remove auth-data from AsyncStorage
-      await AsyncStorage.removeItem('auth-data').then(() => {
-        setAuthData({}); // Clear authData
-        setIsLoggedIn(false); // Set isLoggedIn to false
-      });
-    } catch (e) {
-      console.error("Error removing value:", e);
-    }
+  const handleLogout = () => {
+    AsyncStorage.clear().then(()=>{
+      setIsLoggedIn(false)
+      setAuthData({})
+    })
   };
-
 
 
   return (

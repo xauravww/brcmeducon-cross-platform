@@ -11,8 +11,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplashScreen from '../components/SplashScreen';
 
 export default function Router() {
-  const { role ,setRole } = useContext(selectRoleContext);
-  const { isLoggedIn, setIsLoggedIn, setAuthData } = useContext(authContext);
+  const { role, setRole } = useContext(selectRoleContext);
+  const { isLoggedIn, setIsLoggedIn, setAuthData,authData } = useContext(authContext);
   const [isLoading, setIsLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
 
@@ -23,16 +23,16 @@ export default function Router() {
         if (value !== null) {
           const parsedData = JSON.parse(value);
           setAuthData(parsedData);
-          setRole(()=>{
-           if(parsedData.member.role=='admin') return {
-            Student:false,Faculty:false,Admin:true
-           }
-           if(parsedData.member.role=='student') return {
-            Student:true,Faculty:false,Admin:false
-           }
-           if(parsedData.member.role=='faculty') return {
-            Student:false,Faculty:true,Admin:false
-           }
+          setRole(() => {
+            if (parsedData.member.role == 'admin') return {
+              Student: false, Faculty: false, Admin: true
+            }
+            if (parsedData.member.role == 'student') return {
+              Student: true, Faculty: false, Admin: false
+            }
+            if (parsedData.member.role == 'faculty') return {
+              Student: false, Faculty: true, Admin: false
+            }
           })
           setIsLoggedIn(true);
         } else {
@@ -55,9 +55,11 @@ export default function Router() {
 
 
   const childrenItems = () => {
-    if (showSplash) { 
-     return <SplashScreen/>
+    if (showSplash) {
+      return <SplashScreen />
     }
+
+
 
     if (!isLoggedIn) {
       return <AuthStack />;

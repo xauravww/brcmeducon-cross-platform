@@ -166,7 +166,7 @@ export default function Login({ navigation }) {
 
       <View style={styles.loginPartWrapper}>
         <Text style={styles.roleTitle}>{selectedBtn} Login</Text>
-        <Text style={styles.registerInfo}>Not a member yet ? Register</Text>
+       
         <View style={[styles.inputWrapper, { marginTop: 30 }]}>
           <MaterialIcons name="email" color={appcolor} size={30} />
           <TextInput
@@ -189,6 +189,10 @@ export default function Login({ navigation }) {
             cursorColor="black"
           />
         </View>
+      <Pressable style={styles.forgotPass}  onPress={()=>navigation.navigate("ForgotPassword")} >
+      <Text style={styles.registerInfo}>Forgot Password?</Text>
+      </Pressable>
+
       </View>
       {isLoading ? (
         <ActivityIndicator size="large" color={appcolor} style={styles.loader} />
@@ -274,8 +278,12 @@ const styles = StyleSheet.create({
   registerInfo: {
     color: 'black',
     textAlign: 'center',
-    fontFamily: 'NotoSans_Condensed-Light',
-    fontSize: 20,
+    // fontFamily: 'NotoSans_Condensed-Light',
+    fontSize: 16,
+    alignSelf:"flex-end",
+    marginRight:20,
+    textDecorationLine:"underline"
+
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -285,16 +293,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   textInput: {
-    fontFamily: 'NotoSans_Condensed-Light',
-    fontSize: 18,
-    padding: 8,
-    borderColor: 'black',
     width: '85%',
-    backgroundColor: '#ccc',
-    marginLeft: 10,
-    alignItems: 'center',
-    borderRadius: 5,
-    color:"black"
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#ced4da',
+    borderRadius: 4,
+    marginHorizontal:10,
+    paddingHorizontal: 10,
+    backgroundColor: '#f1f3f5', // Background color
+    color: '#495057', // Text color
+  },
+
+  forgotPass:{
+    marginVertical:20
   },
 
   button: {
@@ -302,7 +313,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: appcolor,
     padding: 10,
-    marginTop: 50,
     width: '95%',
     borderRadius: 10,
   },

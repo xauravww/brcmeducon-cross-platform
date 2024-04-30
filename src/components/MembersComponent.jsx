@@ -6,28 +6,49 @@ import axios from 'axios';
 import { Provider as PaperProvider } from 'react-native-paper';
 import API_URL from "../connection/url"
 import { authContext } from '../context/AuthContextFunction';
-const MembersComponent = () => {
+import { selectRoleContext } from '../context/SelectRoleContext';
+const MembersComponent = ({ navigation }) => {
     const [members, setMembers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterRole, setFilterRole] = useState('All');
     const [selectedBranch, setSelectedBranch] = useState('');
     const [selectedSemester, setSelectedSemester] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
-const { authData} = useContext(authContext)
+    const { navigationState, setNavigationState } = useContext(selectRoleContext);
+    const { authData } = useContext(authContext)
+
+    const fetchData = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/api/v1/admin/members`, {
+                headers: {
+                    "Authorization": `Bearer ${authData?.token}`
+                }
+            });
+            setMembers(response.data.users);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get(`${API_URL}/api/v1/admin/members`,{headers:{
-                    "Authorization":`Bearer ${authData?.token}`
-                }});
-                setMembers(response.data.users);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
+
 
         fetchData();
     }, []);
+
+    useEffect(() => {
+        const focusListener = navigation.addListener('focus', () => {
+            setNavigationState("MembersComponent");
+            console.log("Called fetchdata members as screen focused")
+            fetchData()
+        });
+
+        return () => {
+            if (focusListener) {
+                return focusListener
+            }
+        };
+    }, [navigation]);
 
     const onChangeSearch = (query) => setSearchQuery(query);
 
@@ -74,7 +95,50 @@ const { authData} = useContext(authContext)
     const handleEdit = (member) => {
         setModalVisible(true);
         console.log('Editing member:', member);
-    };
+      
+        const {
+          _id,
+          address,
+          age,
+          batchYear,
+          branch,
+          countryCode,
+          createdAt,
+          dateOfBirth,
+          email,
+          fathername,
+          imageurl,
+          name,
+          phone,
+          registrationNo,
+          role,
+          rollno,
+          semester,
+          verified
+        } = member;
+      
+       navigation.navigate("ManageMembers",{   _id,
+        address,
+        age,
+        batchYear,
+        branch,
+        countryCode,
+        createdAt,
+        dateOfBirth,
+        email,
+        fathername,
+        imageurl,
+        name,
+        phone,
+        registrationNo,
+        role,
+        rollno,
+        semester,
+        verified,
+        "actionType":"EDIT"
+    })
+      };
+      
 
     const styles = StyleSheet.create({
         container: {
@@ -91,14 +155,14 @@ const { authData} = useContext(authContext)
         searchBar: {
             marginBottom: 20,
             borderRadius: 10,
-            backgroundColor:"white",
-            borderWidth:1,
-            borderColor:"#e0e0e0",
+            backgroundColor: "white",
+            borderWidth: 1,
+            borderColor: "#e0e0e0",
             elevation: 3,
             color: '#0D47A1',
-            tintColor:"black",
-            
-            
+            tintColor: "black",
+
+
         },
         searchBarInput: {
             fontSize: 16,
@@ -130,16 +194,16 @@ const { authData} = useContext(authContext)
         },
         title: {
             fontSize: 20,
-            
+
             color: '#123',
             marginBottom: 15,
-            fontFamily:'Montserrat-Bold'
+            fontFamily: 'Montserrat-Bold'
         },
         paragraph: {
             fontSize: 16,
             color: '#555',
             marginBottom: 10,
-            fontFamily:"NotoSans_Condensed-Regular"
+            fontFamily: "NotoSans_Condensed-Regular"
         },
         editButton: {
             marginTop: 20,
@@ -173,8 +237,8 @@ const { authData} = useContext(authContext)
                     iconColor='black'
                     rippleColor="transparent"
                     clearButtonMode="always"
-                    inputStyle={{color:"black"}}
-                    
+                    inputStyle={{ color: "black" }}
+
                 />
                 <Divider style={styles.divider} />
 
@@ -196,7 +260,7 @@ const { authData} = useContext(authContext)
                         style={styles.premiumDropdown}
                         dropdownStyle={styles.premiumDropdownList}
                         buttonStyle={{
-                         backgroundColor:"white",
+                            backgroundColor: "white",
                             width: "100%",
                             borderRadius: 10,
                             shadowColor: "#000",
@@ -290,7 +354,7 @@ const { authData} = useContext(authContext)
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                         paddingVertical: 12,
-                                        borderWidth:1
+                                        borderWidth: 1
                                     }}
                                     buttonTextStyle={{
                                         color: "black",

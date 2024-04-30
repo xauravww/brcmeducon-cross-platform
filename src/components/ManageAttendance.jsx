@@ -52,7 +52,7 @@ const AttendanceScreen = ({ navigation }) => {
         subjectFilter,
         setSubjectFilter,
         attendanceChanged, setAttendanceChanged
-      } = useContext(selectInputContext);
+    } = useContext(selectInputContext);
 
     const { navigationState, setNavigationState } = useContext(selectRoleContext);
     const { authData, setAuthData, setIsLoggedIn } = useContext(authContext);
@@ -88,17 +88,17 @@ const AttendanceScreen = ({ navigation }) => {
     };
 
     const fetchMembersData = () => {
-        axios.get(`${API_URL}/api/v1/admin/members`,{
+        axios.get(`${API_URL}/api/v1/admin/members`, {
             headers: {
                 'Authorization': `Bearer ${authData?.token}`
-              }
+            }
         })
             .then(response => {
                 setMembers(response.data.users);
             })
             .catch(err => {
                 console.error(err);
-                if(err.response.status==404 || err.response.status==401){
+                if (err.response.status == 404 || err.response.status == 401) {
                     handleLogout("Please Login Again ...")
                 }
             });
@@ -112,21 +112,21 @@ const AttendanceScreen = ({ navigation }) => {
             "branch": branchFilter,
             "token": authData?.token
         };
-    
+
         axios.post(`${API_URL}/api/v1/faculty/attendance/unique`, bodyData)
             .then(response => {
                 setAttendanceData(response.data.data);
                 setLoading(false);
                 const existingAttendanceStatus = {};
-    
+
                 response?.data?.data?.forEach((item) => {
                     item.attendanceData.forEach((member) => {
                         existingAttendanceStatus[member._id] = membersAttendanceStatus[member._id] || 'Present';
                     });
                 });
-    
+
                 setmembersAttendanceStatus(existingAttendanceStatus);
-    
+
             })
             .catch(err => {
                 console.error(err);
@@ -140,18 +140,18 @@ const AttendanceScreen = ({ navigation }) => {
         if (dateFilter !== null) {
             fetchAttendanceData();
         }
-    }, [dateFilter,attendanceChanged]);
+    }, [dateFilter, attendanceChanged]);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
-          setNavigationState('ManageAttendance');
-          fetchAttendanceData();
+            setNavigationState('ManageAttendance');
+            fetchAttendanceData();
         });
-      
-        if(unsubscribe){
+
+        if (unsubscribe) {
             return unsubscribe
         }
-    }, [navigation,attendanceChanged]);
+    }, [navigation, attendanceChanged]);
 
     const filteredData = attendanceData.filter(
         item =>
@@ -249,9 +249,9 @@ const AttendanceScreen = ({ navigation }) => {
                     theme='light'
                 />
             </View>
-            
-            <TouchableOpacity onPress={fetchAttendanceData} style={{justifyContent:"center",alignItems:"center" ,backgroundColor:appcolor,alignSelf:"center",marginVertical:5}}>
-                <Text style={{color:"white",fontSize:20,padding:5,paddingHorizontal:5,}}>FETCH DATA</Text>
+
+            <TouchableOpacity onPress={fetchAttendanceData} style={{ justifyContent: "center", alignItems: "center", backgroundColor: appcolor, alignSelf: "center", marginVertical: 5 }}>
+                <Text style={{ color: "white", fontSize: 20, padding: 5, paddingHorizontal: 5, }}>FETCH DATA</Text>
             </TouchableOpacity>
             {loading ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -263,7 +263,7 @@ const AttendanceScreen = ({ navigation }) => {
                     data={filteredData}
                     renderItem={renderItem}
                     keyExtractor={(item) => item?._id}
-                    style={{marginVertical:5}}
+                    style={{ marginVertical: 5 }}
                 />
             )}
             {!loading && filteredData.length === 0 && (

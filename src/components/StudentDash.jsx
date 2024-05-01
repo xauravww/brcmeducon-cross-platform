@@ -90,10 +90,12 @@ export default  function StudentDash({ navigation }) {
                 <Text style={styles.text}>My Attendances</Text>
               </View>
             </TouchableOpacity>
+            <TouchableOpacity onPress={()=>navigation.navigate("TimeTable")}>
             <View style={styles.itemWrapper}>
               <Image source={timeTableIcon} style={styles.endItems} />
               <Text style={styles.text}>Time Table</Text>
             </View>
+            </TouchableOpacity>
           </View>
           <View style={styles.row}>
            <TouchableOpacity onPress={()=>navigation.navigate('IDCard')}>

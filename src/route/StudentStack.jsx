@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Login from '../components/Login';
 import IDCard from '../components/IDCard';
 import { appcolor } from '../constants';
+import TimeTable from "../components/TimeTable"
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -35,6 +36,7 @@ const HomeStack = () => {
         <Stack.Screen name='ShowEvents' component={Event} />
         <Stack.Screen name='StudentAttendance' component={StudentAttendance} />
         <Stack.Screen name='IDCard' component={IDCard} />
+        <Stack.Screen name='TimeTable' component={TimeTable} />
       </Stack.Group>
     </Stack.Navigator>
   );

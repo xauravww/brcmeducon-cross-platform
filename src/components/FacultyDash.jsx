@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, LogBox } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authContext } from '../context/AuthContextFunction';
@@ -12,8 +12,20 @@ import assignmentIcon from '../assets/images/8.png';
 import pyqsIcon from '../assets/images/9.png';
 import profileIcon from '../assets/images/10.png';
 import avatarImage from "../assets/images/man_avatar.jpg"
+import { selectRoleContext } from '../context/SelectRoleContext';
 export default function FacultyDash({ navigation }) {
   const { setIsLoggedIn, authData, setAuthData } = useContext(authContext);
+const {setNavigationState} = useContext(selectRoleContext)
+useEffect(()=>{
+  const unsubscribe = navigation.addListener('focus', () => {
+    setNavigationState('FacultyDash');
+  
+});
+
+if (unsubscribe) {
+    return unsubscribe
+}
+},[navigation])
 
   const storeData = async () => {
     try {
@@ -43,7 +55,7 @@ export default function FacultyDash({ navigation }) {
       <View style={styles.nameCard}>
         <View>
           <Text style={styles.name}>Hello,</Text>
-          <Text style={styles.name}>{ authData.member?.name}</Text>
+          <Text style={styles.name}>{authData.member.name.toString().length>30? authData.member?.name.toString().slice(0,30)+"...":authData.member?.name.toString()}</Text>
           <Text style={styles.textMetaDetail}>ID:{ authData.member?.rollno} | FACULTY</Text>
         </View>
         <View>
@@ -64,7 +76,7 @@ export default function FacultyDash({ navigation }) {
             <TouchableOpacity
               onPress={() => navigation.navigate('ManageAttendance', { role: "FACULTY" })}>
               <View style={styles.itemWrapper}>
-                <Image source={eventsIcon} style={styles.middleItemActive} />
+                <Image source={assignmentIcon} style={styles.middleItemActive} />
                 <Text style={styles.text}>Manage Attendance</Text>
               </View>
             </TouchableOpacity>
@@ -74,6 +86,16 @@ export default function FacultyDash({ navigation }) {
             <View>
               <Image source={idCardIcon} style={styles.endItemsActive} />
               <Text style={styles.text}>ID Card</Text>
+            </View>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.row}>
+            <TouchableOpacity
+            onPress={() => navigation.navigate('TimeTable')}
+            >
+            <View>
+              <Image source={timeTableIcon} style={styles.endItems} />
+              <Text style={styles.text}>Time Table</Text>
             </View>
             </TouchableOpacity>
           </View>
@@ -97,11 +119,14 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     flexDirection: 'row',
     marginTop: 10,
+  marginBottom:20
   },
   name: {
     color: 'black',
     fontFamily: 'Montserrat-Bold',
     fontSize: 30,
+    maxWidth:200,
+    overflow:"scroll"
   },
   text: {
     color: 'black',

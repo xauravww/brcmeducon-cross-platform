@@ -7,8 +7,9 @@ import { authContext } from '../context/AuthContextFunction';
 import SelectDropdown from 'react-native-select-dropdown';
 import { fetchSubjectArr } from './subject-utils/subject';
 import { Button, Card, Title, Paragraph } from 'react-native-paper';
+import { selectRoleContext } from '../context/SelectRoleContext';
 
-export default function StudentAttendance() {
+export default function StudentAttendance({navigation}) {
     const [selected, setSelected] = useState({});
     const [markedDates, setMarkedDates] = useState({});
     const [subject, setSubject] = useState('');
@@ -25,7 +26,17 @@ export default function StudentAttendance() {
         rollno: authData?.member?.rollno,
         token: authData?.token
     });
-
+    const { navigationState ,setNavigationState} = useContext(selectRoleContext);
+    useEffect(()=>{
+        const unsubscribe = navigation.addListener('focus', () => {
+          setNavigationState('StudentAttendace');
+        
+      });
+      
+      if (unsubscribe) {
+          return unsubscribe
+      }
+      },[navigation])
     useEffect(() => {
         setLoading(true);
 

@@ -1,206 +1,333 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, ScrollView } from 'react-native';
+import React, { useState, useRef, useCallback, useContext, useEffect } from 'react';
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View, Animated, TextInput, Pressable } from 'react-native';
+import { TimelineCalendar } from '@howljs/calendar-kit';
+import axios from 'axios';
+import { authContext } from '../context/AuthContextFunction';
+import { PanGestureHandler } from 'react-native-gesture-handler';
 import DatePicker from 'react-native-date-picker';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import SelectDropdown from 'react-native-select-dropdown';
+import { selectRoleContext } from '../context/SelectRoleContext';
+import { appcolor } from '../constants';
+import { Snackbar } from 'react-native-paper';
+import Loader from 'react-native-loader-kit';
+import BottomDrawer from './TimeTableBottomDrawer';
+import API_URL from "../connection/url"
 
-const TaskTimeline = () => {
-    const [selectedDate, setSelectedDate] = useState(new Date());
-    const [currentTime, setCurrentTime] = useState(new Date());
 
-    useEffect(() => {
-        const timerID = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 60000); // Update current time every minute
 
-        return () => clearInterval(timerID);
+
+
+const exampleEvents = [
+    {
+        id: '1',
+        title: 'BDA class',
+        start: new Date('2024-05-03T09:00:00.000Z'),
+        end: new Date('2024-05-03T09:45:00.000Z'),
+        color: '#A3C7D6',
+        sem: "Sem8",
+        branch: "CSE",
+        faculty: "Dr. Sandeep"
+    },
+
+];
+
+const unavailableHours = [
+    { start: 0, end: 9 },
+    { start: 18, end: 24 },
+];
+
+const Calendar = ({ navigation }) => {
+    const [selectedEvent, setSelectedEvent] = useState();
+    const [timeInterval, setTimeInterval] = useState(45);
+    const [startDate, setStartDate] = useState(new Date('2024-05-02T09:00:00.000Z'));
+    const [endDate, setEndDate] = useState(new Date('2024-05-02T10:00:00.000Z'));
+    const calendarRef = useRef(null);
+    const [timeTableData, settimeTableData] = useState(exampleEvents);
+    const { authData } = useContext(authContext);
+    const [openDrawerBottom, setopenDrawerBottom] = useState(false)
+    const [editedEvent, setEditedEvent] = useState({ ...selectedEvent });
+    const role = authData?.member?.role
+   
+    const _onLongPressEvent = useCallback((event) => {
+        setSelectedEvent(event);
+       
     }, []);
 
-    const tasks = [
-        { date: '2024-05-02', time: '13:00', title: 'Meeting with client', description: 'Discuss project details' },
-        { date: '2024-05-02', time: '10:10', title: 'Design review', description: 'Review UI/UX designs' },
-        { date: '2024-05-02', time: '12:00', title: 'Lunch break', description: 'Take a break and recharge' },
-        { date: '2024-05-02', time: '15:00', title: 'Development', description: 'Code implementation' },
-        // Add more tasks as needed
-    ];
+    const _onPressCancel = useCallback(() => {
+        setopenDrawerBottom(false)
+        setSelectedEvent(undefined);
+    }, []);
 
-    const handleDateChange = (date) => {
-        setSelectedDate(date);
+    const _onPressSave = useCallback(() => {
+        setSelectedEvent(undefined);
+    }, []);
+
+    const onUpdateEvent = useCallback((updatedEvent) => {
+        settimeTableData(prevEvents =>
+            prevEvents.map(ev => (ev.id === updatedEvent.id ? updatedEvent : ev))
+        );
+    }, []);
+
+    const handleDeleteEvent = (eventId) => {
+        settimeTableData(prevEvents =>
+            prevEvents.filter(ev => ev.id !== eventId)
+        );
     };
 
-    const generateHoursArray = () => {
-        const hours = [];
-        const todayTasks = tasks.filter(task => {
-            const taskDate = new Date(task.date);
+    const renderBottomDrawer = useCallback(() => {
+        if (selectedEvent) {
             return (
-                taskDate.getFullYear() === selectedDate.getFullYear() &&
-                taskDate.getMonth() === selectedDate.getMonth() &&
-                taskDate.getDate() === selectedDate.getDate()
+                <BottomDrawer
+                    event={selectedEvent}
+                    startDate={startDate}
+                    setStartDate={setStartDate}
+                    endDate={endDate}
+                    setEndDate={setEndDate}
+                    onPressCancel={_onPressCancel}
+                    onPressSave={_onPressSave}
+                    onUpdateEvent={onUpdateEvent}
+                    onDeleteEvent={handleDeleteEvent}
+                    editedEvent={editedEvent}
+                    setEditedEvent={setEditedEvent}
+
+                />
             );
+        }
+        return null;
+    }, [selectedEvent, startDate, endDate, _onPressCancel, _onPressSave, onUpdateEvent]);
+
+    const renderTimeLabel = useCallback((time) => {
+        return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }, []);
+
+    const renderEvent = useCallback((event, index) => {
+        const durationInMinutes = (new Date(event.end) - new Date(event.start)) / (1000 * 60);
+        const height = (durationInMinutes / timeInterval) * 40; // Adjust 40 as per your preference
+        const topPosition = index * (height + 10); // Add overlap spacing if needed
+
+        const onDragEnd = (e, gestureState) => {
+            const durationChangeMinutes = (gestureState.dy * (timeInterval / 40));
+            const newStart = new Date(event.start.getTime() + (durationChangeMinutes * 60 * 1000));
+            const newEnd = new Date(event.end.getTime() + (durationChangeMinutes * 60 * 1000));
+
+            let updatedTimeTableData = [...timeTableData]; // Copy the original array
+
+            // Update the dragged event first (avoids initial "overlapping" state)
+            updatedTimeTableData[updatedTimeTableData.findIndex(ev => ev.id === event.id)] = { ...event, start: newStart, end: newEnd };
+
+            let hasResized = false; // Flag to track if any resizing occurred
+
+            // Iterate through all elements (including the first)
+            for (let i = 0; i < updatedTimeTableData.length; i++) {
+                if (i === updatedTimeTableData.findIndex(ev => ev.id === event.id)) {
+                    continue; // Skip the dragged event (already updated)
+                }
+
+                const otherEvent = updatedTimeTableData[i];
+                if (isColliding(otherEvent, newStart, newEnd)) {
+                    // Resize the colliding event and subsequent overlapping events
+                    const startDiff = Math.abs(newStart - new Date(otherEvent.start));
+                    const endDiff = Math.abs(newEnd - new Date(otherEvent.end));
+                    otherEvent.width = otherEvent.width + startDiff + endDiff;
+
+                    // Update start times of following events if needed
+                    for (let j = i + 1; j < updatedTimeTableData.length; j++) {
+                        const followingEvent = updatedTimeTableData[j];
+                        if (newEnd > followingEvent.start) {
+                            followingEvent.start = newEnd;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    hasResized = true; // Mark resizing done
+                    break; // Exit loop after first collision and resize
+                }
+            }
+
+            // No need to update the dragged event again if no resizing occurred
+
+            settimeTableData(updatedTimeTableData);
+        };
+
+
+        return (
+            <PanGestureHandler onGestureEvent={onDragEnd}>
+                <Animated.View key={event._id} style={[styles.eventContainer, { top: topPosition, height: height}]}>
+                    <Text style={styles.eventTitle}>{event.title}</Text>
+                    <Text style={styles.eventTime}>
+                        Start: {new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}, Duration: {durationInMinutes} minutes
+                    </Text>
+                </Animated.View>
+            </PanGestureHandler>
+        );
+    }, [timeInterval, timeTableData]);
+
+    const { setNavigationState } = useContext(selectRoleContext)
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            setNavigationState('TimeTable');
+
         });
-    
-        // Create an array of hours from 0 to 23
-        for (let i = 0; i < 24; i++) {
-            hours.push(`${i < 10 ? '0' + i : i}:00`);
-        }
-    
-        return { hours, todayTasks };
-    };
 
-    
-    const hourTasks = generateHoursArray().todayTasks.filter(task => {
-        const taskHour = parseInt(task.time.split(':')[0]);
-        const nextHour = taskHour === 23 ? 0 : taskHour + 1;
-        const currentTimeHour = currentTime.getHours();
-    
-        if (taskHour === currentTimeHour) {
-            // If the task starts at the current hour, check if the minutes have passed
-            const currentMinutes = currentTime.getMinutes();
-            const taskMinutes = parseInt(task.time.split(':')[1]);
-            return currentMinutes >= taskMinutes;
-        } else {
-            // Check if the task falls between the current hour and the next hour
-            return currentTimeHour <= taskHour && taskHour < nextHour;
+        if (unsubscribe) {
+            return unsubscribe
         }
-    });
+    }, [navigation])
+
+    useEffect(() => {
+        console.log("role is ", role);
+        alert("This feature is still in development, might contain bugs, but still some APIs are working")
+        try {
+            if (role === "student") {
+                axios.get(`${API_URL}/api/v1/tt/${authData?.member?.branch}/${authData?.member?.semester}`).then((res) => {
+                    console.log(res.data);
+                    settimeTableData(res.data.data);
+                });
+            } else if (role === "faculty") { // Make sure to use "else if" here
+                axios.get(`${API_URL}/api/v1/tt/faculty/${authData?.member?.rollno}`).then((res) => {
+                    console.log(res.data);
+                    settimeTableData(res.data.data);
+                });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }, []); 
     
 
-
-    const getBarPosition = () => {
-        if (selectedDate.toDateString() === new Date().toDateString()) {
-            const hour = currentTime.getHours();
-            const minutes = currentTime.getMinutes();
-            const totalMinutes = hour * 60 + minutes;
-            const pixelsPerMinute = 300 / (24 * 60); // Assuming 300 pixels height for the timeline
-            return totalMinutes * pixelsPerMinute;
-        }
-        return -1; // Return a value that won't affect positioning
-    };
+    const _onEndDragSelectedEvent = useCallback((event) => {
+        console.log("Event occurred:", event);
+        setSelectedEvent(event);
+        setStartDate(new Date(event.start)); // Set start date for date picker
+        setEndDate(new Date(event.end)); // Set end date for date picker
+    }, []);
 
     return (
-        <View style={styles.container}>
-            <View style={styles.datePickerContainer}>
-                <DatePicker
-                    date={selectedDate}
-                    onDateChange={handleDateChange}
-                    mode="date" // Set mode to 'datetime' for inline date picker
-                    textColor="#ffffff" // Adjust text color of the date picker
-                    style={styles.datePicker}
+        <SafeAreaView style={styles.container}>
+            {/* for student and faculty */}
+         {
+            role=="student" || role=="faculty" && (
+                <TimelineCalendar
+                ref={calendarRef}
+                viewMode="day"
+                events={timeTableData}
+                unavailableHours={unavailableHours}
+                allowPinchToZoom
+                
+                renderTimeLabel={renderTimeLabel}
+                timeInterval={timeInterval}
+                renderEvent={renderEvent}
+
+                minTimeIntervalHeight={40}
+                maxTimeIntervalHeight={60}
+                minTimeInterval={15}
+                maxTimeInterval={60}
+
+                overlapEventsSpacing={10}
+            />
+            )
+         }
+            {/* for admin only */}
+            {role == 'admin' && (
+                <TimelineCalendar
+                    ref={calendarRef}
+                    viewMode="day"
+                    events={exampleEvents}
+                    unavailableHours={unavailableHours}
+                    allowPinchToZoom
+                    onLongPressEvent={_onLongPressEvent}
+                    selectedEvent={selectedEvent}
+                    onEndDragSelectedEvent={_onEndDragSelectedEvent}
+                    renderTimeLabel={renderTimeLabel}
+                    timeInterval={timeInterval}
+                    renderEvent={renderEvent}
+
+                    minTimeIntervalHeight={40}
+                    maxTimeIntervalHeight={60}
+                    minTimeInterval={15}
+                    maxTimeInterval={60}
+
+                    overlapEventsSpacing={10}
                 />
-            </View>
-            <Text style={styles.selectedDate}>Tasks for {selectedDate.toDateString()}</Text>
-            <ScrollView style={styles.timelineContainer}>
-                <View style={styles.tasksContainer}>
-                    <View style={[styles.currentTimeIndicator, { top: getBarPosition() === -1 ? -100 : getBarPosition() }]} />
-                    {generateHoursArray().hours.map((hour, index) => {
-                        const hourTasks = generateHoursArray().todayTasks.filter(task => task.time.startsWith(hour));
-                        return (
-                            <View key={index} style={styles.hourContainer}>
-                                <Text style={styles.hourText}>{hour}</Text>
-                                {hourTasks.map((task, taskIndex) => (
-                                    <View key={taskIndex} style={[styles.taskContainer, task.time === currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) && styles.activeTaskContainer]}>
-                                        <View style={styles.timelineDot} />
-                                        <View style={styles.taskDetails}>
-                                            <Text style={[styles.time, task.time === currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) && styles.activeText]}>{task.time}</Text>
-                                            <Text style={[styles.title, task.time === currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) && styles.activeText]}>{task.title}</Text>
-                                            <Text style={styles.description}>{task.description}</Text>
-                                        </View>
-                                    </View>
-                                ))}
-                            </View>
-                        );
-                    })}
+            )}
+
+            {role == 'admin' && (
+                <View style={{ flexDirection: "row", justifyContent: "center", gap: 10 }}>
+                    <SelectDropdown
+                        data={['Sem1', 'Sem2', 'Sem3', 'Sem4', 'Sem5', 'Sem6', 'Sem7', 'Sem8']}
+                        onSelect={(selectedItem, index) => setEditedEvent({ ...editedEvent, sem: selectedItem })}
+                        defaultButtonText="Semester"
+                        buttonStyle={{ width: "45%" }}
+                        dropdownStyle={{ backgroundColor: '#FFF' }}
+                        textStyle={{ color: 'black' }}
+                    />
+                    <SelectDropdown
+                        data={['CSE', 'CIVIL', 'EE', 'ME']}
+                        onSelect={(selectedItem, index) => setEditedEvent({ ...editedEvent, branch: selectedItem })}
+                        defaultButtonText="Branch"
+                        buttonStyle={{ width: "45%" }}
+                        dropdownStyle={{ backgroundColor: '#FFF' }}
+                        textStyle={{ color: 'black' }}
+                    />
                 </View>
-            </ScrollView>
-        </View>
+            )}
+
+
+            {role == "admin" && (
+                <TouchableOpacity style={{ position: "absolute", bottom: 30, right: 20 }} onPress={() => setopenDrawerBottom(true)}>
+                    <Text style={{ color: "black", fontSize: 55 }}>+</Text>
+                </TouchableOpacity>
+            )}
+            {openDrawerBottom && (
+                <BottomDrawer event={selectedEvent}
+                    startDate={startDate}
+                    setStartDate={setStartDate}
+                    endDate={endDate}
+                    setEndDate={setEndDate}
+                    onPressCancel={_onPressCancel}
+                    onPressSave={_onPressSave}
+                    onUpdateEvent={onUpdateEvent}
+                    onDeleteEvent={handleDeleteEvent}
+                    openDrawerBottom={openDrawerBottom}
+                    setopenDrawerBottom={setopenDrawerBottom}
+                    editedEvent={editedEvent}
+                    setEditedEvent={setEditedEvent}
+                />
+            )}
+        </SafeAreaView>
     );
 };
 
+
+
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#ffffff',
-        padding: 10,
-        paddingTop: 50
-    },
-    datePickerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    container: { flex: 1, backgroundColor: '#FFF' },
+    button: {
+        height: 45,
+        paddingHorizontal: 24,
+        backgroundColor: '#1973E7',
         justifyContent: 'center',
-        marginBottom: 20,
-        backgroundColor: 'black',
-        borderRadius: 5,
-        overflow: 'hidden' // Ensure date picker doesn't overflow its container
+        borderRadius: 24,
+        marginHorizontal: 8,
+        marginVertical: 8,
     },
-    datePicker: {
-        flex: 1
+    btnText: { fontSize: 16, color: '#FFF', fontWeight: 'bold' },
+    eventContainer: {
+        padding: 8,
+        backgroundColor: '#EFEFEF',
+        borderRadius: 8,
+        marginBottom: 8,
     },
-    timelineContainer: {
-        flex: 1
-    },
-    tasksContainer: {
-        marginTop: 20,
-        position: 'relative' // Ensure proper positioning of the current time bar
-    },
-    selectedDate: {
-        fontSize: 20,
+    eventTitle: {
         fontWeight: 'bold',
-        marginBottom: 10,
-        color: 'black'
+        marginBottom: 4,
     },
-    hourContainer: {
-        marginBottom: 20
+    eventTime: {
+        fontStyle: 'italic',
     },
-    hourText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 5,
-        color: 'black'
-    },
-    taskContainer: {
-        flexDirection: 'row',
-        marginLeft: 20,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 5,
-        padding: 10
-    },
-    activeTaskContainer: {
-        backgroundColor: 'lightblue' // Background color for active tasks
-    },
-    timelineDot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: 'blue',
-        marginRight: 10
-    },
-    taskDetails: {
-        flex: 1
-    },
-    time: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 5,
-        color: 'black'
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 5,
-        color: 'black'
-    },
-    activeText: {
-        color: 'blue' // Text color for active tasks
-    },
-    description: {
-        fontSize: 16,
-        color: 'black'
-    },
-    currentTimeIndicator: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        height: 2,
-        backgroundColor: 'red' // Color of the current time indicator bar
-    }
 });
 
-export default TaskTimeline;
+export default Calendar;

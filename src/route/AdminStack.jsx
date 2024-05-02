@@ -14,7 +14,7 @@ import ManageMembers from '../components/ManageMembers'
 import { appcolor } from '../constants';
 import { selectRoleContext } from '../context/SelectRoleContext';
 import IDCard from '../components/IDCard';
-
+import TimeTable from "../components/TimeTable"
 const Drawer = createDrawerNavigator();
 const stack = createNativeStackNavigator();
 
@@ -51,6 +51,7 @@ const AdminHomeStack = () => {
 
       <stack.Screen name='ManageMembers' component={ManageMembers} />
       <stack.Screen name='IDCard' component={IDCard}/>
+      <stack.Screen name='TimeTable' component={TimeTable}/>
     </stack.Navigator>
   );
 };

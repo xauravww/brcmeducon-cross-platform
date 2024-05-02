@@ -204,6 +204,7 @@ export default function Login({ navigation }) {
 
 {logOutMsg.length > 0 && (
       <Snackbar
+      style={{position:"absolute",bottom:200}}
         visible={visible}
         onDismiss={onDismissSnackBar}
         action={{

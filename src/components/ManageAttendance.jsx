@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { View, FlatList, Button, Text, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, FlatList, Button, Text, ScrollView, RefreshControl, TouchableOpacity, Dimensions } from 'react-native';
 import { Card, Title, Paragraph, List, Divider } from 'react-native-paper';
 import axios from 'axios';
 import SelectDropdown from 'react-native-select-dropdown';
@@ -19,7 +19,7 @@ const styles = {
     pickerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         backgroundColor: '#dadada',
         width: '100%',
         paddingHorizontal: 10,
@@ -39,6 +39,7 @@ const AttendanceScreen = ({ navigation }) => {
     const [subjectArr, setsubjectArr] = useState([])
     const [members, setMembers] = useState([]);
     const [membersAttendanceStatus, setmembersAttendanceStatus] = useState({});
+    const [showOverlay, setshowOverlay] = useState(false)
     const [selectedMembers, setSelectedMembers] = useState([]);
     const flatListRef = useRef(null);
 
@@ -105,6 +106,7 @@ const AttendanceScreen = ({ navigation }) => {
     };
 
     const fetchAttendanceData = () => {
+        setshowOverlay(true)
         const formattedDate = moment(dateFilter || date).format('YYYY-MM-DD');
         const bodyData = {
             "date": formattedDate,
@@ -162,12 +164,15 @@ const AttendanceScreen = ({ navigation }) => {
     );
 
     const renderItem = ({ item }) => (
-        <Card style={{ margin: 10, padding: 10 }}>
+        <Card style={{ margin: 10, padding: 10, height: 500, overflow: "scroll" }}>
             <Card.Content>
                 <View style={{ justifyContent: "space-between", flexDirection: "row", alignItems: "center" }}>
                     <Title><Text>{item.subject}</Text></Title>
                     <TouchableOpacity onPress={() => navigation.navigate("CreateAttendanceScreen", { editAttendance: true, branchFilter, semesterFilter, date: dateFilter?.toISOString() || new Date().toISOString(), subjectFilter, attendanceDataId: attendanceData[0]?._id, attendanceData })}>
                         <Icon name="pencil-outline" color="green" size={20} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setshowOverlay(false)}>
+                        <Icon name="close" color="red" size={30} />
                     </TouchableOpacity>
                 </View>
                 <Paragraph>Date: {new Date(item.date).toDateString()}</Paragraph>
@@ -176,23 +181,26 @@ const AttendanceScreen = ({ navigation }) => {
                 <Divider />
                 <List.Section>
                     <List.Subheader>Attendance Data</List.Subheader>
-                    {item.attendanceData.map((data, index) => (
-                        <View key={index} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Text style={{ color: "black" }}>{`${data.rollno}- ${data.name}`}</Text>
-                            {data.status === 'Present' ? (
-                                <Icon name="checkmark-circle-outline" color="green" size={20} />
-                            ) : (
-                                <Icon name="close-circle-outline" color="red" size={20} />
-                            )}
-                        </View>
-                    ))}
+                    <ScrollView style={{ maxWidth: "100%" }}>
+                        {item.attendanceData.map((data, index) => (
+                            <View key={index} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Text style={{ color: "black", overflow: "scroll", maxWidth: 250 }}>{`${data.rollno}- ${data.name}`}</Text>
+                                {data.status === 'Present' ? (
+                                    <Icon name="checkmark-circle-outline" color="green" size={20} />
+                                ) : (
+                                    <Icon name="close-circle-outline" color="red" size={20} />
+                                )}
+
+                            </View>
+                        ))}
+                    </ScrollView>
                 </List.Section>
             </Card.Content>
         </Card>
     );
 
     useEffect(() => {
-        fetchMembersData();
+        // fetchMembersData();
     }, []);
 
     return (
@@ -207,7 +215,7 @@ const AttendanceScreen = ({ navigation }) => {
             }
         >
             <View style={styles.pickerContainer}>
-                <Icon name="code-outline" color={'black'} size={30} />
+
                 <SelectDropdown
                     data={['CSE', 'CIVIL', 'EE', 'ME']}
                     onSelect={(selectedItem, index) => {
@@ -215,10 +223,11 @@ const AttendanceScreen = ({ navigation }) => {
                     }}
                     defaultButtonText={branchFilter || "Select Branch"}
                     style={styles.picker}
+                    buttonStyle={{ width: "100%" }}
                 />
             </View>
             <View style={styles.pickerContainer}>
-                <Icon name="school-outline" color={'black'} size={30} />
+
                 <SelectDropdown
                     data={['Sem1', 'Sem2', 'Sem3', 'Sem4', 'Sem5', 'Sem6', 'Sem7', 'Sem8']}
                     onSelect={(selectedItem, index) => {
@@ -226,10 +235,10 @@ const AttendanceScreen = ({ navigation }) => {
                     }}
                     defaultButtonText={semesterFilter || "Select Semester"}
                     style={styles.picker}
+                    buttonStyle={{ width: "100%" }}
                 />
             </View>
             <View style={styles.pickerContainer}>
-                <Icon name="book-outline" color={'black'} size={30} />
                 <SelectDropdown
                     data={subjectArr._j}
                     onSelect={(selectedItem, index) => {
@@ -237,10 +246,10 @@ const AttendanceScreen = ({ navigation }) => {
                     }}
                     defaultButtonText={subjectFilter || "Select Subject"}
                     style={styles.picker}
+                    buttonStyle={{ width: "100%" }}
                 />
             </View>
             <View style={styles.pickerContainer}>
-                <Icon name="calendar" color={'black'} size={35} />
                 <DatePicker
                     date={dateFilter || date}
                     onDateChange={setDateFilter}
@@ -251,23 +260,34 @@ const AttendanceScreen = ({ navigation }) => {
             </View>
 
             <TouchableOpacity onPress={fetchAttendanceData} style={{ justifyContent: "center", alignItems: "center", backgroundColor: appcolor, alignSelf: "center", marginVertical: 5 }}>
-                <Text style={{ color: "white", fontSize: 20, padding: 5, paddingHorizontal: 5, }}>FETCH DATA</Text>
+                <Text style={{ color: "white", fontSize: 20, padding: 8, paddingHorizontal: 10, }}>FETCH DATA</Text>
             </TouchableOpacity>
-            {loading ? (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Title>Loading...</Title>
-                </View>
-            ) : (
-                <FlatList
-                    ref={flatListRef}
-                    data={filteredData}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item?._id}
-                    style={{ marginVertical: 5 }}
-                />
-            )}
+            <View style={{
+                position: "absolute", top: (Dimensions.get('window').height / 2) - 350,
+                left: (Dimensions.get('window').width / 2) - 170,
+            }}>
+                {loading ? (
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        {/* <Title>Loading...</Title> */}
+                    </View>
+                ) : (
+                    <>
+                        {
+                            showOverlay && (
+                                <FlatList
+                                    ref={flatListRef}
+                                    data={filteredData}
+                                    renderItem={renderItem}
+                                    keyExtractor={(item) => item?._id}
+                                    style={{ marginVertical: 5 }}
+                                />
+                            )
+                        }
+                    </>
+                )}
+            </View>
             {!loading && filteredData.length === 0 && (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{ flex: 1, justifyContent:"flex-start", alignItems: 'center',marginTop:40 }}>
                     <Title>No Data Found</Title>
                 </View>
             )}

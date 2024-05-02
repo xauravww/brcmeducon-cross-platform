@@ -60,7 +60,7 @@ export default function AdminDash({ navigation }) {
         <View style={styles.nameCard}>
           <View>
             <Text style={styles.name}>Hello,</Text>
-            <Text style={styles.name}>{authData.member?.name}</Text>
+            <Text style={styles.name}>{authData.member.name.toString().length>30? authData.member?.name.toString().slice(0,30)+"...":authData.member?.name.toString()}</Text>
             <Text style={styles.textMetaDetail}>ID:{authData.member?.rollno} | ADMIN</Text>
           </View>
           <View>
@@ -92,6 +92,16 @@ export default function AdminDash({ navigation }) {
                 <Text style={styles.text}>Manage Members</Text>
               </View>
             </TouchableOpacity>
+           
+          </View>
+          <View style={styles.row}>
+          <TouchableOpacity
+              onPress={() => navigation.navigate('TimeTable')}>
+              <View style={styles.itemWrapper}>
+                <Image source={timeTableIcon} style={styles.endItems} />
+                <Text style={styles.text}>Manage Time Table</Text>
+              </View>
+            </TouchableOpacity>
           </View>
           <View style={styles.row}>
 
@@ -117,11 +127,14 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     flexDirection: 'row',
     marginTop: 10,
+  marginBottom:20
   },
   name: {
     color: 'black',
     fontFamily: 'Montserrat-Bold',
     fontSize: 30,
+    maxWidth:200,
+    overflow:"scroll"
   },
   text: {
     color: 'black',

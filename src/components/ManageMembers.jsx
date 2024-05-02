@@ -145,9 +145,9 @@ const ManageEvents = ({ navigation, route }) => {
 
 
 
-useEffect(()=>{
-  console.log(JSON.stringify(memberData.branch))
-},[memberData.branch])
+  useEffect(() => {
+    console.log(JSON.stringify(memberData.branch))
+  }, [memberData.branch])
 
 
   const handleBlur = (field) => {
@@ -512,7 +512,7 @@ useEffect(()=>{
         }
         {(memberData.role == "admin" || memberData.role == "faculty") &&
           Object.keys(memberData)
-            .filter(item => item !== "dateOfBirth" && item !== "branch" && item !== "role" && item !== "registrationNo" && item !== "registrationNo" && item !== "semester" && item !== "rollno" && item !== "rollno" && item !== "batchYear")
+            .filter(item => item !== "dateOfBirth" && item !== "branch" && item !== "role" && item !== "registrationNo" && item !== "registrationNo" && item !== "semester" && item !== "rollno" && item !== "batchYear")
             .map((key) => (
               <View key={key}>
                 <Text style={styles.textInputHeaders}>{capitalizeFirstLetter(key)}</Text>
@@ -552,6 +552,20 @@ useEffect(()=>{
               </View>
             ))
         }
+
+{authData?.member?.role=='admin' && (
+ <View>
+   <Text style={{color:"black"}}>{capitalizeFirstLetter(authData?.member?.role)} ID</Text>
+  <TextInput
+   
+    style={styles.input}
+    placeholder={`${authData.role} ID`}
+    onChangeText={(text) => handleInputChange("rollno", text)}
+    placeholderTextColor="gray"
+    value={memberData?.rollno}
+  />
+  </View>
+)}
       </View>
 
       <View>

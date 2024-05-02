@@ -1,11 +1,23 @@
-import React, { useContext } from 'react';
+import React, { useContext ,useEffect} from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { Text, Title, Subheading, Card, Avatar, Badge } from 'react-native-paper';
 import { authContext } from '../context/AuthContextFunction';
 import FlipCard from 'react-native-flip-card';
+import { selectRoleContext } from '../context/SelectRoleContext';
 
-const IDCard = () => {
+const IDCard = ({navigation}) => {
   const { authData } = useContext(authContext);
+  const { navigationState ,setNavigationState} = useContext(selectRoleContext);
+  useEffect(()=>{
+    const unsubscribe = navigation.addListener('focus', () => {
+      setNavigationState('IDCard');
+    
+  });
+  
+  if (unsubscribe) {
+      return unsubscribe
+  }
+  },[navigation])
 
   if (!authData) {
     return <Text>Loading...</Text>;

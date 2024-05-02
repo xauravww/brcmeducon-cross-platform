@@ -19,6 +19,7 @@ import { TouchableOpacity } from 'react-native';
 import { Alert } from 'react-native';
 import { authContext } from '../context/AuthContextFunction';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import { selectRoleContext } from '../context/SelectRoleContext';
 
 const Row = ({ children }) => (
   <View style={styles.row}>{children}</View>
@@ -26,7 +27,7 @@ const Row = ({ children }) => (
 
 export default  function StudentDash({ navigation }) {
   const { setIsLoggedIn, authData, setAuthData } = useContext(authContext);
-
+  const { navigationState ,setNavigationState} = useContext(selectRoleContext);
   const storeData = async (value) => {
     try {
       const jsonValue = JSON.stringify(value);
@@ -46,6 +47,17 @@ export default  function StudentDash({ navigation }) {
   'If you want to use Reanimated 2 then go through our installation steps https://docs.swmansion.com/react-native-reanimated/docs/installation',
    
   ]);
+
+  useEffect(()=>{
+    const unsubscribe = navigation.addListener('focus', () => {
+      setNavigationState('StudentDash');
+    
+  });
+  
+  if (unsubscribe) {
+      return unsubscribe
+  }
+  },[navigation])
   
   return (
     <View style={styles.container}>
@@ -53,7 +65,7 @@ export default  function StudentDash({ navigation }) {
      <View style={styles.nameCard}>
         <View>
           <Text style={styles.name}>Hello,</Text>
-          <Text style={styles.name}>{authData.member?.name || "USER"}</Text>
+          <Text style={styles.name}>{authData.member.name.toString().length>30? authData.member?.name.toString().slice(0,30)+"...":authData.member?.name.toString()}</Text>
           <Text style={styles.textMetaDetail}>ID:{authData.member?.rollno || "ROLLNO"} | STUDENT</Text>
         </View>
       <View>
@@ -86,7 +98,7 @@ export default  function StudentDash({ navigation }) {
               onPress={() => navigation.navigate('StudentAttendance')}
             >
               <View style={styles.itemWrapper}>
-                <Image source={galleryIcon} style={styles.middleItemActive} />
+                <Image source={assignmentIcon} style={styles.middleItemActive} />
                 <Text style={styles.text}>My Attendances</Text>
               </View>
             </TouchableOpacity>
@@ -120,18 +132,19 @@ const styles = StyleSheet.create({
   },
   nameCard: {
     width: '100%',
-    height:120,
-    // backgroundColor: 'green',
+    height: 120,
     justifyContent: 'space-between',
     alignContent: 'center',
     flexDirection: 'row',
     marginTop: 10,
+  marginBottom:20
   },
   name: {
     color: 'black',
     fontFamily: 'Montserrat-Bold',
-
     fontSize: 30,
+    maxWidth:200,
+    overflow:"scroll"
   },
   text: {
     color: 'black',

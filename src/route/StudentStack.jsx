@@ -13,6 +13,7 @@ import Login from '../components/Login';
 import IDCard from '../components/IDCard';
 import { appcolor } from '../constants';
 import TimeTable from "../components/TimeTable"
+import { selectRoleContext } from '../context/SelectRoleContext';
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -44,7 +45,7 @@ const HomeStack = () => {
 
 export default function StudentStack({ }) {
   const navigation = useNavigation()
-
+  const { navigationState ,setNavigationState} = useContext(selectRoleContext);
   return (
     <Drawer.Navigator initialRouteName='Home'
       drawerContent={({ navigation }) => <CustomDrawerContent navigation={navigation} />}
@@ -79,6 +80,7 @@ export default function StudentStack({ }) {
           color: "#ffffff"
         },
         headerTintColor: "#ffffff",
+        headerTitle:navigationState || "StudentDash"
       }}
     >
       <Drawer.Screen name='Home' component={HomeStack} />

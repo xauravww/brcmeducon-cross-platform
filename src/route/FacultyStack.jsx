@@ -14,7 +14,7 @@ import { appcolor } from '../constants';
 import SelectRoleContext, { selectRoleContext } from '../context/SelectRoleContext';
 import IDCard from '../components/IDCard';
 import Event from '../components/Event';
-
+import TimeTable from "../components/TimeTable"
 const Drawer = createDrawerNavigator();
 const stack = createNativeStackNavigator();
 
@@ -50,6 +50,7 @@ const FacultyHomeStack = () => {
       <stack.Screen name='CreateAttendanceScreen' component={CreateAttendanceScreen} />
       <stack.Screen name='IDCard' component={IDCard} />
       <stack.Screen name='Events' component={Event} />
+      <stack.Screen name='TimeTable' component={TimeTable} />
     </stack.Navigator>
   )
 };
@@ -58,18 +59,21 @@ export default function FacultyStack() {
   const navigation = useNavigation();
   const { navigationState ,setNavigationState} = useContext(selectRoleContext);
 useEffect(() => {
+  console.log("faculty navigation.getState()")
   console.log(navigation.getState())
 
 }, [navigation])
 
   return (
-    <Drawer.Navigator initialRouteName='FacultyHome'
+    <Drawer.Navigator initialRouteName={navigationState || 'FacultyHome'}
       drawerContent={({ navigation }) => <CustomDrawerContent navigation={navigation} />}
       screenOptions={{
         drawerStyle: {
           backgroundColor: '#dadada',
           width: 240,
         },
+headerTitle:navigationState || 'FacultyHome'
+        ,
         headerRight: () => {
           if (navigationState === 'ManageAttendance') {
             return (
@@ -106,7 +110,8 @@ useEffect(() => {
           color:"#ffffff"
         },
         headerTintColor: "#ffffff", 
-      }}
+      }
+    }
     >
       <Drawer.Screen name='FacultyHome' component={FacultyHomeStack} />
     </Drawer.Navigator>

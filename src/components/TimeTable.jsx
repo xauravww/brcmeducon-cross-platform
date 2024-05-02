@@ -209,7 +209,7 @@ const Calendar = ({ navigation }) => {
         <SafeAreaView style={styles.container}>
             {/* for student and faculty */}
          {
-            role=="student" || role=="faculty" && (
+            (role=="student" || role=="faculty") && (
                 <TimelineCalendar
                 ref={calendarRef}
                 viewMode="day"
